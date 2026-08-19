@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:padding="20dp">
+
+    <!-- Top Navigation Row: Back Button & Language Switcher -->
+    <RelativeLayout
+        android:id="@+id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:clickable="true"
+            android:focusable="true"
+            android:text="&lt; Back"
+            android:textColor="@color/brand_text_dark"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <!-- Language Switcher Pill -->
+        <LinearLayout
+            android:id="@+id/btnLessonLangToggle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/bg_lang_toggle"
+            android:clickable="true"
+            android:focusable="true"
+            android:orientation="horizontal"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp">
+
+            <TextView
+                android:id="@+id/tvLessonLangEng"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ENG"
+                android:textColor="@color/brand_text_muted"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="4dp"
+                android:text="|"
+                android:textColor="@color/brand_text_muted"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/tvLessonLangBem"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BEM"
+                android:textColor="@color/brand_orange"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <!-- Subject Title & Topic -->
+    <TextView
+        android:id="@+id/tvLessonSubject"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/topBar"
+        android:layout_marginTop="20dp"
+        android:text="Scienci"
+        android:textColor="@color/brand_text_dark"
+        android:textSize="22sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tvLessonTopic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvLessonSubject"
+        android:layout_marginTop="4dp"
+        android:text="Inama sha mu Ng'anda ne sha mu mpanga"
+        android:textColor="@color/brand_text_muted"
+        android:textSize="14sp" />
+
+    <!-- Lesson Content Card -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/btnListenAudio"
+        android:layout_below="@id/tvLessonTopic"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/bg_lesson_card"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/tvLessonBody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:lineSpacingExtra="5dp"
+            android:textColor="@color/white"
+            android:textSize="15sp" />
+    </ScrollView>
+
+    <!-- Bottom Audio Listen Button -->
+    <Button
+        android:id="@+id/btnListenAudio"
+        android:layout_width="match_parent"
+        android:layout_height="54dp"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/bg_audio_button"
+        android:text="Play - Kutikeni ku fyebo"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+</RelativeLayout>
