@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson — Steam on Wheels</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="screen">
+    <div class="top-bar">
+      <button class="back-btn" onclick="window.location.href='/'">&lt; Back</button>
+      <button class="lang-toggle" id="langToggle">
+        <span id="langEng">ENG</span>
+        <span class="divider">|</span>
+        <span id="langBem" class="active">BEM</span>
+      </button>
+    </div>
+
+    <div class="lesson-subject" id="lessonSubject">Loading…</div>
+    <div class="lesson-topic" id="lessonTopic"></div>
+
+    <div class="lesson-card">
+      <p class="lesson-body" id="lessonBody">Loading lesson…</p>
+    </div>
+
+    <button class="audio-btn" id="btnListenAudio">Play - Kutikeni ku fyebo</button>
+  </div>
+
+  <script>
+    let isBemba = true;
+    let lessonData = null;
+    let speechSynth = window.speechSynthesis;
+
+    const params = new URLSearchParams(window.location.search);
+    const subject = params.get('subject') || 'Science';
+
+    const lessonSubject = document.getElementById('lessonSubject');
+    const lessonTopic = document.getElementById('lessonTopic');
+    const lessonBody = document.getElementById('lessonBody');
+    const btnListenAudio = document.getElementById('btnListenAudio');
+    const langEng = document.getElementById('langEng');
+    const langBem = document.getElementById('langBem');
+
+    function updateDisplay() {
+      lessonSubject.textContent = subject;
+      if (!lessonData) return;
+
+      if (isBemba) {
+        lessonTopic.textContent = lessonData.topic_bem;
+        lessonBody.textContent = lessonData.content_bem;
+        btnListenAudio.textContent = 'Play - Kutikeni ku fyebo';
+        langBem.classList.add('active');
+        langEng.classList.remove('active');
+      } else {
+        lessonTopic.textContent = lessonData.topic_en;
+        lessonBody.textContent = lessonData.content_en;
+        btnListenAudio.textContent = 'Play - Listen to Lesson';
+        langEng.classList.add('active');
+        langBem.classList.remove('active');
+      }
+    }
+
+    async function loadLesson() {
+      try {
+        const res = await fetch(`/api/lessons/${encodeURIComponent(subject)}`);
+        lessonData = await res.json();
+      } catch (err) {
+        lessonData = {
+          topic_en: 'Could not load lesson',
+          topic_bem: 'Tafwile ukusanga amasambililo',
+          content_en: 'There was a problem reaching the server. Please try again later.',
+          content_bem: 'Kwaliba ubwafya bwa kuya ku seva. Mwesheni na kabili.',
+        };
+      }
+      updateDisplay();
+    }
+
+    document.getElementById('langToggle').addEventListener('click', () => {
+      isBemba = !isBemba;
+      updateDisplay();
+    });
+
+    btnListenAudio.addEventListener('click', () => {
+      if (!speechSynth) {
+        alert('Audio playback is not supported in this browser.');
+        return;
+      }
+      speechSynth.cancel();
+      const utterance = new SpeechSynthesisUtterance(lessonBody.textContent);
+      utterance.lang = isBemba ? 'en-US' : 'en-US'; // Bemba voice not generally available in browsers
+      speechSynth.speak(utterance);
+    });
+
+    loadLesson();
+  </script>
+</body>
+</html>

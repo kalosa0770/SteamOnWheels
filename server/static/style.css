@@ -1,0 +1,312 @@
+:root {
+  --brand-orange: #FF7700;
+  --brand-orange-dark: #E56A00;
+  --brand-text-dark: #1E293B;
+  --brand-text-muted: #64748B;
+  --white: #FFFFFF;
+  --card-radius: 18px;
+  --pill-radius: 999px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--white);
+  color: var(--brand-text-dark);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.screen {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
+  padding: 20px;
+  padding-bottom: 96px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Header ---------- */
+
+.top-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.app-logo {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--brand-orange);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.lang-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #F4F5F7;
+  border-radius: var(--pill-radius);
+  padding: 6px 12px;
+  cursor: pointer;
+  border: none;
+  user-select: none;
+}
+
+.lang-toggle span {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--brand-text-muted);
+}
+
+.lang-toggle span.active {
+  color: var(--brand-orange);
+}
+
+.lang-toggle .divider {
+  color: var(--brand-text-muted);
+  font-weight: 400;
+  padding: 0 2px;
+}
+
+/* ---------- Home screen ---------- */
+
+.greeting {
+  margin-top: 24px;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.3;
+  white-space: pre-line;
+}
+
+.subjects-card {
+  margin-top: 24px;
+  background: var(--brand-orange);
+  border-radius: var(--card-radius);
+  padding: 20px;
+}
+
+.subjects-title {
+  color: var(--white);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.subjects-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.subject-btn {
+  height: 72px;
+  border-radius: 14px;
+  border: none;
+  background: var(--white);
+  color: var(--brand-text-dark);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.subject-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+.all-lessons-link {
+  display: block;
+  text-align: center;
+  margin-top: 24px;
+  color: var(--white);
+  font-size: 14px;
+  font-weight: 700;
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+/* ---------- Bottom nav ---------- */
+
+.bottom-nav {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 40px);
+  max-width: 440px;
+  height: 64px;
+  background: var(--brand-text-dark);
+  border-radius: var(--pill-radius);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.bottom-nav .nav-item {
+  flex: 1;
+  text-align: center;
+  font-size: 13px;
+  color: var(--white);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.bottom-nav .nav-item.active {
+  color: var(--brand-orange);
+  font-weight: 700;
+}
+
+/* ---------- Lesson screen ---------- */
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.back-btn {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--brand-text-dark);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.lesson-subject {
+  margin-top: 20px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.lesson-topic {
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--brand-text-muted);
+}
+
+.lesson-card {
+  flex: 1;
+  margin-top: 16px;
+  background: var(--brand-text-dark);
+  border-radius: var(--card-radius);
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.lesson-body {
+  color: var(--white);
+  font-size: 15px;
+  line-height: 1.6;
+  white-space: pre-line;
+  margin: 0;
+}
+
+.audio-btn {
+  margin-top: 16px;
+  width: 100%;
+  height: 54px;
+  border-radius: 14px;
+  border: none;
+  background: var(--brand-orange);
+  color: var(--white);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.audio-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* ---------- Upload screen ---------- */
+
+.upload-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.upload-subtitle {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--brand-text-muted);
+}
+
+.field {
+  width: 100%;
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #E2E8F0;
+  font-size: 15px;
+  font-family: inherit;
+  color: var(--brand-text-dark);
+}
+
+.field:focus {
+  outline: none;
+  border-color: var(--brand-orange);
+}
+
+textarea.field {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.submit-btn {
+  margin-top: 20px;
+  width: 100%;
+  height: 54px;
+  border-radius: 14px;
+  border: none;
+  background: var(--brand-orange);
+  color: var(--white);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.status-box {
+  margin-top: 20px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #F4F5F7;
+  color: var(--brand-text-dark);
+  font-size: 14px;
+  white-space: pre-line;
+  line-height: 1.5;
+}
+
+@media (max-width: 380px) {
+  .greeting { font-size: 22px; }
+}

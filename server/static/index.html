@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Steam on Wheels</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="screen">
+    <div class="top-header">
+      <button class="app-logo" onclick="window.location.href='/upload'">⚙️ STEAM</button>
+      <button class="lang-toggle" id="langToggle">
+        <span id="langEng">ENG</span>
+        <span class="divider">|</span>
+        <span id="langBem" class="active">BEM</span>
+      </button>
+    </div>
+
+    <div class="greeting" id="greeting">Mwabweleni,
+ba Micheal</div>
+
+    <div class="subjects-card">
+      <div class="subjects-title" id="subjectsTitle">SUBJECTS</div>
+      <div class="subjects-grid">
+        <button class="subject-btn" data-subject="Maths">MATHS</button>
+        <button class="subject-btn" data-subject="Literacy">LITERACY</button>
+        <button class="subject-btn" data-subject="Science">SCIENCE</button>
+        <button class="subject-btn" data-subject="CTS">CTS</button>
+      </div>
+      <button class="all-lessons-link" id="allLessonsLink">Amasambililo yonse&nbsp; ›</button>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-item active">Home</button>
+    <button class="nav-item" onclick="window.location.href='/upload'">Lessons</button>
+    <button class="nav-item">Progress</button>
+    <button class="nav-item">Profile</button>
+  </div>
+
+  <script>
+    let isBemba = true;
+
+    const greeting = document.getElementById('greeting');
+    const subjectsTitle = document.getElementById('subjectsTitle');
+    const allLessonsLink = document.getElementById('allLessonsLink');
+    const langEng = document.getElementById('langEng');
+    const langBem = document.getElementById('langBem');
+
+    function updateLanguage() {
+      if (isBemba) {
+        greeting.textContent = 'Mwabweleni,\nba Micheal';
+        subjectsTitle.textContent = 'SUBJECTS';
+        allLessonsLink.innerHTML = "Amasambililo yonse&nbsp; ›";
+        langBem.classList.add('active');
+        langEng.classList.remove('active');
+      } else {
+        greeting.textContent = 'Welcome,\nMicheal';
+        subjectsTitle.textContent = 'SUBJECTS';
+        allLessonsLink.innerHTML = "All lessons&nbsp; ›";
+        langEng.classList.add('active');
+        langBem.classList.remove('active');
+      }
+    }
+
+    document.getElementById('langToggle').addEventListener('click', () => {
+      isBemba = !isBemba;
+      updateLanguage();
+    });
+
+    document.querySelectorAll('.subject-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const subject = btn.getAttribute('data-subject');
+        window.location.href = `/lesson?subject=${encodeURIComponent(subject)}`;
+      });
+    });
+
+    updateLanguage();
+  </script>
+</body>
+</html>

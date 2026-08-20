@@ -8,12 +8,12 @@ import java.util.concurrent.TimeUnit;
 
 public class TranslationService {
 
-    private static final String API_URL = "https://friday-exposure-womankind.ngrok-free.dev/translate";
+    // Live Production Fly.io API URL
+    private static final String API_URL = "https://steamonwheels.fly.dev/translate";
 
     private final OkHttpClient client = new OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(60, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(60, TimeUnit.SECONDS)
+            .readTimeout(120, TimeUnit.SECONDS)
             .build();
 
     public interface TranslationCallback {
@@ -41,7 +41,7 @@ public class TranslationService {
             client.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
-                    callback.onError("Network connection error: " + e.getMessage());
+                    callback.onError("Network error: " + e.getMessage());
                 }
 
                 @Override
@@ -55,18 +55,18 @@ public class TranslationService {
                                 String translatedText = item.getString("translation_text");
                                 callback.onSuccess(translatedText);
                             } else {
-                                callback.onError("Empty translation response from server.");
+                                callback.onError("Empty translation response.");
                             }
                         } catch (Exception e) {
-                            callback.onError("Failed to parse AI response: " + e.getMessage());
+                            callback.onError("Parsing error: " + e.getMessage());
                         }
                     } else {
-                        callback.onError("Server returned error: HTTP " + response.code());
+                        callback.onError("API Error: HTTP " + response.code());
                     }
                 }
             });
         } catch (Exception e) {
-            callback.onError("Payload creation error: " + e.getMessage());
+            callback.onError("Request error: " + e.getMessage());
         }
     }
 }

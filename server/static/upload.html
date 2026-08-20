@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upload Lesson — Steam on Wheels</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="screen">
+    <div class="top-bar">
+      <button class="back-btn" onclick="window.location.href='/'">&lt; Back</button>
+    </div>
+
+    <div class="upload-title">Upload Educational Content</div>
+    <div class="upload-subtitle">Enter English content. AI will auto-translate to Bemba.</div>
+
+    <input class="field" id="etSubject" placeholder="Subject (e.g., Science, Maths)" />
+    <input class="field" id="etTopicEnglish" placeholder="Topic Title in English" />
+    <textarea class="field" id="etContentEnglish" placeholder="English Lesson Body / Sentences"></textarea>
+
+    <button class="submit-btn" id="btnUploadTranslate">Auto-Translate and Save to DB</button>
+
+    <div class="status-box" id="tvAutoTranslateStatus">AI Status: Waiting for input...</div>
+  </div>
+
+  <script>
+    const etSubject = document.getElementById('etSubject');
+    const etTopicEnglish = document.getElementById('etTopicEnglish');
+    const etContentEnglish = document.getElementById('etContentEnglish');
+    const btnUploadTranslate = document.getElementById('btnUploadTranslate');
+    const statusBox = document.getElementById('tvAutoTranslateStatus');
+
+    btnUploadTranslate.addEventListener('click', async () => {
+      const subject = etSubject.value.trim();
+      const topicEn = etTopicEnglish.value.trim();
+      const contentEn = etContentEnglish.value.trim();
+
+      if (!subject || !topicEn || !contentEn) {
+        alert('Please fill in all fields');
+        return;
+      }
+
+      statusBox.textContent = 'AI Status: Translating topic and content to Bemba...';
+      btnUploadTranslate.disabled = true;
+
+      try {
+        const res = await fetch('/api/lessons', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ subject, topic_en: topicEn, content_en: contentEn }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || `Server error (${res.status})`);
+        }
+
+        const saved = await res.json();
+        statusBox.textContent =
+          `Saved to DB!\n\nBemba Topic: ${saved.topic_bem}\n\nBemba Content:\n${saved.content_bem}`;
+        alert(`Saved to ${subject}! Check the lesson screen.`);
+      } catch (err) {
+        statusBox.textContent = `Error: ${err.message}`;
+      } finally {
+        btnUploadTranslate.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
