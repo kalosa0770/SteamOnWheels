@@ -13,6 +13,7 @@ public class TranslationService {
     private final OkHttpClient client = new OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
             .build();
 
     public interface TranslationCallback {
@@ -40,7 +41,7 @@ public class TranslationService {
             client.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
-                    callback.onError("Network error: " + e.getMessage());
+                    callback.onError("Network connection error: " + e.getMessage());
                 }
 
                 @Override
@@ -54,18 +55,18 @@ public class TranslationService {
                                 String translatedText = item.getString("translation_text");
                                 callback.onSuccess(translatedText);
                             } else {
-                                callback.onError("Empty response from AI");
+                                callback.onError("Empty translation response from server.");
                             }
                         } catch (Exception e) {
-                            callback.onError("Parsing error: " + e.getMessage());
+                            callback.onError("Failed to parse AI response: " + e.getMessage());
                         }
                     } else {
-                        callback.onError("API Error: HTTP " + response.code());
+                        callback.onError("Server returned error: HTTP " + response.code());
                     }
                 }
             });
         } catch (Exception e) {
-            callback.onError("Request error: " + e.getMessage());
+            callback.onError("Payload creation error: " + e.getMessage());
         }
     }
 }
