@@ -1,14 +1,17 @@
+import io
 import os
 import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, timezone
 
+import numpy as np
 import torch
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+from scipy.io.wavfile import write as write_wav
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, VitsModel, AutoTokenizer as AutoTokenizerTTS
 
 app = FastAPI(title="Steam on Wheels Bemba Translation API")
 
@@ -16,10 +19,23 @@ MODEL_ID = "Wana1708/nllb-bemba-education"
 SRC_LANG = "eng_Latn"
 TGT_LANG = "bem_Latn"
 
+# Meta MMS text-to-speech models — one VITS model per language.
+# "bem" = Bemba, "eng" = English. If facebook/mms-tts-bem turns out to be
+# unavailable or low quality for your dialect, swap this for a fine-tuned
+# alternative (e.g. one trained on the BembaSpeech corpus) — the rest of
+# this code doesn't need to change, only the model id.
+TTS_MODEL_IDS = {
+    "bem": "facebook/mms-tts-bem",
+    "eng": "facebook/mms-tts-eng",
+}
+
 DB_PATH = os.path.join(os.path.dirname(__file__), "lessons.db")
 
 tokenizer = None
 model = None
+
+# Cache of loaded TTS models, keyed by language code
+_tts_cache = {}
 
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -88,10 +104,52 @@ def run_translation(text: str, tgt_lang: str = TGT_LANG) -> str:
     return tok.batch_decode(generated_tokens, skip_special_tokens=True)[0]
 
 
+# ---------------------------------------------------------------------------
+# Text-to-speech (Meta MMS / VITS)
+# ---------------------------------------------------------------------------
+
+def get_tts_model(lang: str):
+    if lang not in TTS_MODEL_IDS:
+        raise HTTPException(status_code=400, detail=f"Unsupported TTS language: {lang}")
+
+    if lang not in _tts_cache:
+        model_id = TTS_MODEL_IDS[lang]
+        print(f"Loading MMS-TTS model for '{lang}' ({model_id})...")
+        tts_tokenizer = AutoTokenizerTTS.from_pretrained(model_id)
+        tts_model = VitsModel.from_pretrained(model_id)
+        tts_model.eval()
+        _tts_cache[lang] = (tts_tokenizer, tts_model)
+        print(f"MMS-TTS model for '{lang}' loaded.")
+
+    return _tts_cache[lang]
+
+
+def synthesize_speech(text: str, lang: str) -> bytes:
+    tts_tokenizer, tts_model = get_tts_model(lang)
+    inputs = tts_tokenizer(text, return_tensors="pt")
+
+    with torch.inference_mode():
+        output = tts_model(**inputs).waveform
+
+    waveform = output.squeeze().cpu().numpy()
+    waveform = np.clip(waveform, -1.0, 1.0)
+    pcm16 = (waveform * 32767).astype(np.int16)
+
+    buffer = io.BytesIO()
+    write_wav(buffer, rate=tts_model.config.sampling_rate, data=pcm16)
+    buffer.seek(0)
+    return buffer.read()
+
+
 class TranslationRequest(BaseModel):
     inputs: str
     src_lang: str = SRC_LANG
     tgt_lang: str = TGT_LANG
+
+
+class TTSRequest(BaseModel):
+    text: str
+    lang: str = "bem"  # "bem" or "eng"
 
 
 class LessonCreateRequest(BaseModel):
@@ -134,6 +192,21 @@ def translate(req: TranslationRequest):
         raise HTTPException(status_code=400, detail="Input text cannot be empty")
     result = run_translation(req.inputs, req.tgt_lang)
     return [{"translation_text": result}]
+
+
+@app.post("/api/tts")
+def text_to_speech(req: TTSRequest):
+    if not req.text or not req.text.strip():
+        raise HTTPException(status_code=400, detail="Text cannot be empty")
+
+    try:
+        audio_bytes = synthesize_speech(req.text.strip(), req.lang)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"TTS generation failed: {e}")
+
+    return StreamingResponse(io.BytesIO(audio_bytes), media_type="audio/wav")
 
 
 @app.get("/api/lessons/{subject}")

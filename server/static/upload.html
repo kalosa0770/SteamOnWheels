@@ -4,24 +4,48 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Upload Lesson — Steam on Wheels</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
   <div class="screen">
     <div class="top-bar">
-      <button class="back-btn" onclick="window.location.href='/'">&lt; Back</button>
+      <button class="back-btn" onclick="window.location.href='/'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back
+      </button>
     </div>
 
-    <div class="upload-title">Upload Educational Content</div>
-    <div class="upload-subtitle">Enter English content. AI will auto-translate to Bemba.</div>
+    <div class="upload-header">
+      <div class="upload-eyebrow">
+        <span class="route-dot"></span>
+        Teacher access
+      </div>
+      <div class="upload-title">Upload educational content</div>
+      <div class="upload-subtitle">Enter English content below — the AI model will translate it to Bemba automatically before saving. Students won't see this screen; it's only reachable from the STEAM logo.</div>
+    </div>
 
-    <input class="field" id="etSubject" placeholder="Subject (e.g., Science, Maths)" />
-    <input class="field" id="etTopicEnglish" placeholder="Topic Title in English" />
-    <textarea class="field" id="etContentEnglish" placeholder="English Lesson Body / Sentences"></textarea>
+    <div class="field-group">
+      <label class="field-label" for="etSubject">Subject</label>
+      <input class="field" id="etSubject" placeholder="e.g. Science, Maths" />
+    </div>
 
-    <button class="submit-btn" id="btnUploadTranslate">Auto-Translate and Save to DB</button>
+    <div class="field-group">
+      <label class="field-label" for="etTopicEnglish">Topic title (English)</label>
+      <input class="field" id="etTopicEnglish" placeholder="e.g. Domestic and Wild Animals" />
+    </div>
 
-    <div class="status-box" id="tvAutoTranslateStatus">AI Status: Waiting for input...</div>
+    <div class="field-group">
+      <label class="field-label" for="etContentEnglish">Lesson body (English)</label>
+      <textarea class="field" id="etContentEnglish" placeholder="Write the lesson content here…"></textarea>
+    </div>
+
+    <button class="submit-btn" id="btnUploadTranslate">Auto-translate &amp; save</button>
+
+    <div class="status-box" id="tvAutoTranslateStatus">
+      <span class="status-label">AI status</span>
+      <span id="statusText">Waiting for input…</span>
+    </div>
   </div>
 
   <script>
@@ -29,7 +53,7 @@
     const etTopicEnglish = document.getElementById('etTopicEnglish');
     const etContentEnglish = document.getElementById('etContentEnglish');
     const btnUploadTranslate = document.getElementById('btnUploadTranslate');
-    const statusBox = document.getElementById('tvAutoTranslateStatus');
+    const statusText = document.getElementById('statusText');
 
     btnUploadTranslate.addEventListener('click', async () => {
       const subject = etSubject.value.trim();
@@ -41,7 +65,7 @@
         return;
       }
 
-      statusBox.textContent = 'AI Status: Translating topic and content to Bemba...';
+      statusText.textContent = 'Translating topic and content to Bemba…';
       btnUploadTranslate.disabled = true;
 
       try {
@@ -57,11 +81,11 @@
         }
 
         const saved = await res.json();
-        statusBox.textContent =
-          `Saved to DB!\n\nBemba Topic: ${saved.topic_bem}\n\nBemba Content:\n${saved.content_bem}`;
+        statusText.textContent =
+          `Saved!\n\nBemba topic: ${saved.topic_bem}\n\nBemba content:\n${saved.content_bem}`;
         alert(`Saved to ${subject}! Check the lesson screen.`);
       } catch (err) {
-        statusBox.textContent = `Error: ${err.message}`;
+        statusText.textContent = `Error: ${err.message}`;
       } finally {
         btnUploadTranslate.disabled = false;
       }
