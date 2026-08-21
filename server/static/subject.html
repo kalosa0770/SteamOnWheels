@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Progress — Steam on Wheels</title>
+  <title>Subject — Steam on Wheels</title>
   <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
   <link href="/static/output.css?v=3" rel="stylesheet" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,24 +31,26 @@
     </div>
     <nav class="flex flex-col gap-1">
       <a href="/" class="sidebar-item"><svg viewBox="0 0 24 24" fill="none"><path d="M4 11L12 4L20 11V19C20 19.55 19.55 20 19 20H15V14H9V20H5C4.45 20 4 19.55 4 19V11Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>Home</a>
-      <a href="/lessons" class="sidebar-item"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5.5C4 4.67 4.67 4 5.5 4H11V19H5.5C4.67 19 4 18.33 4 17.5V5.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M20 5.5C20 4.67 19.33 4 18.5 4H13V19H18.5C19.33 19 20 18.33 20 17.5V5.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>Lessons</a>
-      <a href="/progress" class="sidebar-item active"><svg viewBox="0 0 24 24" fill="none"><path d="M5 20V12M12 20V6M19 20V15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Progress</a>
+      <a href="/lessons" class="sidebar-item active"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5.5C4 4.67 4.67 4 5.5 4H11V19H5.5C4.67 19 4 18.33 4 17.5V5.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M20 5.5C20 4.67 19.33 4 18.5 4H13V19H18.5C19.33 19 20 18.33 20 17.5V5.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>Lessons</a>
+      <a href="/progress" class="sidebar-item"><svg viewBox="0 0 24 24" fill="none"><path d="M5 20V12M12 20V6M19 20V15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Progress</a>
       <a href="/profile" class="sidebar-item"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="2"/><path d="M4.5 20C5.5 16 8.5 14 12 14C15.5 14 18.5 16 19.5 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Profile</a>
     </nav>
   </aside>
     <div class="flex-1 flex justify-center">
       <div class="w-full max-w-md md:max-w-3xl px-5 md:px-10 pt-8 md:pt-10 pb-28 md:pb-10">
-        <div class="flex items-center justify-between md:justify-end">
-          <span class="md:hidden"></span>
+        <div class="flex items-center justify-between">
+          <button onclick="history.back()" class="flex items-center gap-1 font-display font-bold text-[15px] border-0 bg-transparent cursor-pointer"><svg viewBox="0 0 24 24" fill="none" class="w-4 h-4"><path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Back</button>
           <div class="lang-toggle" id="langToggle">
             <span id="langEng">ENG</span><span id="langBem" class="active">BEM</span>
           </div>
         </div>
 
-        <h1 id="pageTitle" class="font-display font-extrabold text-2xl md:text-3xl mt-6">Ukuya Pa Ntanshi</h1>
+        <h1 id="subjectTitle" class="font-display font-extrabold text-2xl md:text-3xl mt-6">Loading…</h1>
+        <p id="lessonCount" class="text-navy/55 text-sm mt-1"></p>
 
         <div class="bg-orange rounded-[28px] mt-6 p-5 md:p-8">
-          <div id="progressList" class="grid md:grid-cols-2 gap-5"></div>
+          <div id="sectionsList" class="grid gap-4"></div>
+          <p id="emptyState" class="text-white/85 text-sm hidden">No lessons have been posted for this subject yet. Check back soon!</p>
         </div>
 
       </div>
@@ -56,68 +58,92 @@
   </div>
   <nav class="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-md h-16 bg-navy-deep rounded-full flex items-center px-2 shadow-xl z-40">
     <a href="/" class="nav-item"><svg viewBox="0 0 24 24" fill="none"><path d="M4 11L12 4L20 11V19C20 19.55 19.55 20 19 20H15V14H9V20H5C4.45 20 4 19.55 4 19V11Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Home</span></a>
-    <a href="/lessons" class="nav-item"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5.5C4 4.67 4.67 4 5.5 4H11V19H5.5C4.67 19 4 18.33 4 17.5V5.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M20 5.5C20 4.67 19.33 4 18.5 4H13V19H18.5C19.33 19 20 18.33 20 17.5V5.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Lessons</span></a>
-    <a href="/progress" class="nav-item active"><svg viewBox="0 0 24 24" fill="none"><path d="M5 20V12M12 20V6M19 20V15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Progress</span></a>
+    <a href="/lessons" class="nav-item active"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5.5C4 4.67 4.67 4 5.5 4H11V19H5.5C4.67 19 4 18.33 4 17.5V5.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M20 5.5C20 4.67 19.33 4 18.5 4H13V19H18.5C19.33 19 20 18.33 20 17.5V5.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Lessons</span></a>
+    <a href="/progress" class="nav-item"><svg viewBox="0 0 24 24" fill="none"><path d="M5 20V12M12 20V6M19 20V15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Progress</span></a>
     <a href="/profile" class="nav-item"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="2"/><path d="M4.5 20C5.5 16 8.5 14 12 14C15.5 14 18.5 16 19.5 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Profile</span></a>
   </nav>
+
   <script src="/static/auth.js?v=3"></script>
   <script>
-    const SUBJECTS = ['Maths', 'Literacy', 'Science', 'CTS'];
-    let progressData = SUBJECTS.map(subject => ({ subject, pct: 0 }));
+    const params = new URLSearchParams(window.location.search);
+    const subject = params.get('subject') || '';
 
     let isBemba = true;
-    const pageTitle = document.getElementById('pageTitle');
+    let lessons = [];
+
+    const subjectTitle = document.getElementById('subjectTitle');
+    const lessonCount = document.getElementById('lessonCount');
+    const sectionsList = document.getElementById('sectionsList');
+    const emptyState = document.getElementById('emptyState');
     const langEng = document.getElementById('langEng');
     const langBem = document.getElementById('langBem');
-    const progressList = document.getElementById('progressList');
-    const CONTINUE_LABEL = { bem: 'Konkanyapo uku sambilila', eng: 'Continue learning' };
 
-    async function fetchProgress() {
+    const COUNT_LABEL = { bem: (n) => `${n} ${n === 1 ? 'lesson' : 'lessons'}`, eng: (n) => `${n} ${n === 1 ? 'lesson' : 'lessons'}` };
+    const OPEN_LABEL = { bem: 'Fungulani', eng: 'Open' };
+
+    function formatDate(iso) {
       try {
-        const res = await authFetch('/api/progress');
-        progressData = await res.json();
+        return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
       } catch (e) {
-        // Keep the all-zero defaults if the request fails.
+        return '';
       }
     }
 
     function render() {
-      progressList.innerHTML = '';
-      progressData.forEach(({ subject, pct }) => {
+      subjectTitle.textContent = subject;
+      lessonCount.textContent = COUNT_LABEL.eng(lessons.length);
+
+      sectionsList.innerHTML = '';
+      if (lessons.length === 0) {
+        emptyState.classList.remove('hidden');
+        return;
+      }
+      emptyState.classList.add('hidden');
+
+      lessons.forEach((lesson) => {
+        const topic = isBemba ? lesson.topic_bem : lesson.topic_en;
         const card = document.createElement('div');
-        card.className = 'progress-card flex flex-col items-center gap-4';
+        card.className = 'bg-white rounded-2xl p-4 flex items-center justify-between gap-3';
         card.innerHTML = `
-          <div class="font-display font-bold text-navy text-sm tracking-wide uppercase self-start">${subject}</div>
-          <div class="w-full h-11 rounded-full border border-navy/15 relative overflow-hidden">
-            <div class="h-full bg-orange rounded-full flex items-center px-4 transition-all" style="width:${Math.max(pct, 14)}%">
-              <span class="text-white font-display font-bold text-sm">${pct}%</span>
-            </div>
+          <div class="min-w-0">
+            <div class="font-display font-bold text-navy text-[15px] truncate">${topic}</div>
+            <div class="text-navy/40 text-xs mt-1">${formatDate(lesson.created_at)}</div>
           </div>
-          <button data-subject="${subject}" class="flex items-center gap-1.5 text-navy font-semibold text-sm border-0 bg-transparent cursor-pointer">
-            <span>${isBemba ? CONTINUE_LABEL.bem : CONTINUE_LABEL.eng}</span><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button data-id="${lesson.id}" class="shrink-0 flex items-center gap-1.5 text-orange-dark font-semibold text-sm border-0 bg-transparent cursor-pointer">
+            <span>${isBemba ? OPEN_LABEL.bem : OPEN_LABEL.eng}</span><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
         `;
-        progressList.appendChild(card);
+        sectionsList.appendChild(card);
       });
-      progressList.querySelectorAll('button[data-subject]').forEach(btn => {
+
+      sectionsList.querySelectorAll('button[data-id]').forEach((btn) => {
         btn.addEventListener('click', () => {
-          window.location.href = `/subject?subject=${encodeURIComponent(btn.dataset.subject)}`;
+          window.location.href = `/lesson?id=${encodeURIComponent(btn.dataset.id)}`;
         });
       });
     }
 
     function updateLanguage() {
-      pageTitle.textContent = isBemba ? 'Ukuya Pa Ntanshi' : 'Progress';
       if (isBemba) { langBem.classList.add('active'); langEng.classList.remove('active'); }
       else { langEng.classList.add('active'); langBem.classList.remove('active'); }
       render();
     }
     document.getElementById('langToggle').addEventListener('click', () => { isBemba = !isBemba; updateLanguage(); });
 
-    (async () => {
-      const user = await requireAuth('pupil');
-      if (!user) return;
-      await fetchProgress();
+    async function loadLessons() {
+      try {
+        const res = await authFetch(`/api/subjects/${encodeURIComponent(subject)}/lessons`);
+        lessons = await res.json();
+      } catch (e) {
+        lessons = [];
+      }
       updateLanguage();
+    }
+
+    (async () => {
+      const user = await requireAuth();
+      if (!user) return;
+      loadLessons();
     })();
   </script>
 </body>

@@ -378,6 +378,11 @@ def lesson_page():
     return FileResponse(os.path.join(STATIC_DIR, "lesson.html"))
 
 
+@app.get("/subject")
+def subject_page():
+    return FileResponse(os.path.join(STATIC_DIR, "subject.html"))
+
+
 @app.get("/upload")
 def upload_page():
     return FileResponse(os.path.join(STATIC_DIR, "upload.html"))
@@ -592,29 +597,42 @@ def text_to_speech(req: TTSRequest, user: sqlite3.Row = Depends(get_current_user
     return StreamingResponse(io.BytesIO(audio_bytes), media_type="audio/wav")
 
 
-@app.get("/api/lessons/{subject}")
-def get_lesson(subject: str, user: sqlite3.Row = Depends(get_current_user)):
+@app.get("/api/subjects/{subject}/lessons")
+def list_subject_lessons(subject: str, user: sqlite3.Row = Depends(get_current_user)):
+    """All lessons (sections) posted for a subject, newest first."""
     with get_db() as conn:
-        row = conn.execute(
-            "SELECT * FROM lessons WHERE subject = ? ORDER BY id DESC LIMIT 1",
+        rows = conn.execute(
+            "SELECT id, topic_en, topic_bem, created_at FROM lessons WHERE subject = ? ORDER BY id DESC",
             (subject,),
-        ).fetchone()
+        ).fetchall()
+
+    return [
+        {
+            "id": row["id"],
+            "topic_en": row["topic_en"],
+            "topic_bem": row["topic_bem"],
+            "created_at": row["created_at"],
+        }
+        for row in rows
+    ]
+
+
+@app.get("/api/lessons/{lesson_id}")
+def get_lesson(lesson_id: int, user: sqlite3.Row = Depends(get_current_user)):
+    with get_db() as conn:
+        row = conn.execute("SELECT * FROM lessons WHERE id = ?", (lesson_id,)).fetchone()
 
     if row is None:
-        return {
-            "subject": subject,
-            "topic_en": f"{subject} — No lessons uploaded yet",
-            "topic_bem": f"{subject} — Tapali amasambililo",
-            "content_en": "No lesson content has been uploaded for this subject yet.",
-            "content_bem": "Tapali amasambililo ayabikwapo pali ino misango.",
-        }
+        raise HTTPException(status_code=404, detail="Lesson not found")
 
     return {
+        "id": row["id"],
         "subject": row["subject"],
         "topic_en": row["topic_en"],
         "topic_bem": row["topic_bem"],
         "content_en": row["content_en"],
         "content_bem": row["content_bem"],
+        "created_at": row["created_at"],
     }
 
 
@@ -658,16 +676,12 @@ def create_lesson(req: LessonCreateRequest, teacher: sqlite3.Row = Depends(requi
 
 @app.get("/api/teacher/lessons")
 def teacher_lessons(teacher: sqlite3.Row = Depends(require_teacher)):
-    """Most recent lesson per subject posted by this teacher, for the dashboard."""
+    """Every lesson (section) this teacher has posted, grouped by subject on
+    the client — newest-first within each subject."""
     with get_db() as conn:
         rows = conn.execute(
-            """
-            SELECT * FROM lessons
-            WHERE teacher_id = ?
-            AND id IN (SELECT MAX(id) FROM lessons WHERE teacher_id = ? GROUP BY subject)
-            ORDER BY id DESC
-            """,
-            (teacher["id"], teacher["id"]),
+            "SELECT * FROM lessons WHERE teacher_id = ? ORDER BY subject ASC, id DESC",
+            (teacher["id"],),
         ).fetchall()
 
     return [

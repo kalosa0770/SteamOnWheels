@@ -84,7 +84,7 @@
     document.getElementById('langToggle').addEventListener('click', () => { isBemba = !isBemba; updateLanguage(); });
     document.querySelectorAll('.subject-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        window.location.href = `/lesson?subject=${encodeURIComponent(btn.dataset.subject)}`;
+        window.location.href = `/subject?subject=${encodeURIComponent(btn.dataset.subject)}`;
       });
     });
 

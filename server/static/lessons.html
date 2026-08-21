@@ -68,23 +68,33 @@
     const langEng = document.getElementById('langEng');
     const langBem = document.getElementById('langBem');
     const lessonsList = document.getElementById('lessonsList');
-    const OPEN_LABEL = { bem: 'Fungulani ilyashi', eng: 'Open lesson' };
+    const OPEN_LABEL = { bem: 'Fungulani', eng: 'View lessons' };
+    const EMPTY_LABEL = { bem: 'Tapali amasambililo', eng: 'No lessons yet' };
+    const COUNT_LABEL = {
+      bem: (n) => `${n} ${n === 1 ? 'ilyashi' : 'amasambililo'}`,
+      eng: (n) => `${n} ${n === 1 ? 'lesson' : 'lessons'}`,
+    };
 
     async function loadLessons() {
       lessonsList.innerHTML = '';
       for (const subject of SUBJECTS) {
-        let data;
+        let lessons = [];
         try {
-          const res = await authFetch(`/api/lessons/${encodeURIComponent(subject)}`);
-          data = await res.json();
+          const res = await authFetch(`/api/subjects/${encodeURIComponent(subject)}/lessons`);
+          lessons = await res.json();
         } catch (e) { continue; }
 
-        const topic = isBemba ? data.topic_bem : data.topic_en;
+        const latest = lessons[0];
+        const summary = latest
+          ? (isBemba ? latest.topic_bem : latest.topic_en)
+          : (isBemba ? EMPTY_LABEL.bem : EMPTY_LABEL.eng);
+
         const card = document.createElement('div');
         card.className = 'progress-card flex flex-col gap-3';
         card.innerHTML = `
           <div class="font-display font-bold text-navy text-sm tracking-wide uppercase">${subject}</div>
-          <div class="text-navy/60 text-sm">${topic}</div>
+          <div class="text-navy/60 text-sm">${summary}</div>
+          <div class="text-navy/35 text-xs">${lessons.length ? (isBemba ? COUNT_LABEL.bem(lessons.length) : COUNT_LABEL.eng(lessons.length)) : ''}</div>
           <button data-subject="${subject}" class="mt-1 flex items-center gap-1.5 text-orange-dark font-semibold text-sm border-0 bg-transparent cursor-pointer self-start">
             <span>${isBemba ? OPEN_LABEL.bem : OPEN_LABEL.eng}</span><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         `;
@@ -92,7 +102,7 @@
       }
       lessonsList.querySelectorAll('button[data-subject]').forEach(btn => {
         btn.addEventListener('click', () => {
-          window.location.href = `/lesson?subject=${encodeURIComponent(btn.dataset.subject)}`;
+          window.location.href = `/subject?subject=${encodeURIComponent(btn.dataset.subject)}`;
         });
       });
     }

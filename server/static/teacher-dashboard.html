@@ -81,25 +81,43 @@
         }
         emptyState.classList.add('hidden');
 
+        // Group flat list into subject -> lessons[], preserving the
+        // subject-then-newest-first order the backend already returns.
+        const bySubject = [];
         lessons.forEach((lesson) => {
-          const card = document.createElement('div');
-          card.className = 'bg-white rounded-2xl p-4 flex items-center justify-between gap-3';
-          card.innerHTML = `
-            <div class="min-w-0">
-              <div class="font-display font-bold text-navy text-sm tracking-wide uppercase">${lesson.subject}</div>
-              <div class="text-navy/60 text-sm truncate mt-0.5">${lesson.topic_en}</div>
-              <div class="text-navy/40 text-xs mt-1">Posted ${formatDate(lesson.created_at)}</div>
-            </div>
-            <button data-subject="${lesson.subject}" class="shrink-0 flex items-center gap-1.5 text-orange-dark font-semibold text-sm border-0 bg-transparent cursor-pointer">
-              <span>Preview</span><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-          `;
-          lessonsList.appendChild(card);
+          let group = bySubject.find((g) => g.subject === lesson.subject);
+          if (!group) {
+            group = { subject: lesson.subject, lessons: [] };
+            bySubject.push(group);
+          }
+          group.lessons.push(lesson);
         });
 
-        lessonsList.querySelectorAll('button[data-subject]').forEach((btn) => {
+        bySubject.forEach((group) => {
+          const heading = document.createElement('div');
+          heading.className = 'font-display font-bold text-navy text-sm tracking-wide uppercase mt-2 first:mt-0';
+          heading.textContent = `${group.subject} (${group.lessons.length})`;
+          lessonsList.appendChild(heading);
+
+          group.lessons.forEach((lesson) => {
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-2xl p-4 flex items-center justify-between gap-3';
+            card.innerHTML = `
+              <div class="min-w-0">
+                <div class="text-navy text-sm truncate">${lesson.topic_en}</div>
+                <div class="text-navy/40 text-xs mt-1">Posted ${formatDate(lesson.created_at)}</div>
+              </div>
+              <button data-id="${lesson.id}" class="shrink-0 flex items-center gap-1.5 text-orange-dark font-semibold text-sm border-0 bg-transparent cursor-pointer">
+                <span>Preview</span><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            `;
+            lessonsList.appendChild(card);
+          });
+        });
+
+        lessonsList.querySelectorAll('button[data-id]').forEach((btn) => {
           btn.addEventListener('click', () => {
-            window.location.href = `/lesson?subject=${encodeURIComponent(btn.dataset.subject)}`;
+            window.location.href = `/lesson?id=${encodeURIComponent(btn.dataset.id)}`;
           });
         });
       } catch (e) {

@@ -68,7 +68,7 @@
     let speechSynth = window.speechSynthesis;
 
     const params = new URLSearchParams(window.location.search);
-    const subject = params.get('subject') || 'Science';
+    const lessonId = params.get('id');
 
     const lessonSubject = document.getElementById('lessonSubject');
     const lessonTopic = document.getElementById('lessonTopic');
@@ -79,8 +79,8 @@
     const langBem = document.getElementById('langBem');
 
     function updateDisplay() {
-      lessonSubject.textContent = subject;
       if (!lessonData) return;
+      lessonSubject.textContent = lessonData.subject || 'Lesson';
       if (isBemba) {
         lessonTopic.textContent = lessonData.topic_bem;
         lessonBody.textContent = lessonData.content_bem;
@@ -94,13 +94,15 @@
       }
     }
 
-    // Fire-and-forget: records "viewed"/"listened" progress for this pupil.
-    // The backend silently no-ops this for teachers previewing a lesson.
+    // Fire-and-forget: records "viewed"/"listened" progress for this pupil,
+    // against the lesson's subject. The backend silently no-ops this for
+    // teachers previewing a lesson.
     async function recordProgress(event) {
+      if (!lessonData || !lessonData.subject) return;
       try {
         await authFetch('/api/progress', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ subject, event }),
+          body: JSON.stringify({ subject: lessonData.subject, event }),
         });
       } catch (e) {
         // Non-critical — don't interrupt the lesson if this fails.
@@ -108,13 +110,23 @@
     }
 
     async function loadLesson() {
+      if (!lessonId) {
+        lessonData = {
+          subject: 'Lesson', topic_en: 'Lesson not found', topic_bem: 'Tapali ilyashi',
+          content_en: 'No lesson was specified. Please go back and pick a lesson.',
+          content_bem: 'Tapali ilyashi lyalangwa. Ambukileni ku numa mukasale ilyashi.',
+        };
+        updateDisplay();
+        return;
+      }
       try {
-        const res = await authFetch(`/api/lessons/${encodeURIComponent(subject)}`);
+        const res = await authFetch(`/api/lessons/${encodeURIComponent(lessonId)}`);
+        if (!res.ok) throw new Error('Lesson not found');
         lessonData = await res.json();
         recordProgress('viewed');
       } catch (err) {
         lessonData = {
-          topic_en: 'Could not load lesson', topic_bem: 'Tafwile ukusanga amasambililo',
+          subject: 'Lesson', topic_en: 'Could not load lesson', topic_bem: 'Tafwile ukusanga amasambililo',
           content_en: 'There was a problem reaching the server. Please try again later.',
           content_bem: 'Kwaliba ubwafya bwa kuya ku seva. Mwesheni na kabili.',
         };
