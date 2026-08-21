@@ -26,15 +26,17 @@ torch.set_num_threads(2)
 
 app = FastAPI(title="Steam on Wheels Bemba Translation API")
 
-# Upgraded from nllb-200-distilled-600M -> nllb-200-1.3B.
-# Bemba (bem_Latn) is a low-resource language for NLLB; the 1.3B checkpoint
-# is noticeably more coherent on it than the 600M distilled model.
-# NOTE: this roughly doubles RAM usage vs. the 600M model (~5-6GB vs ~2-3GB
-# for weights + activations). Make sure your Railway plan/instance has
-# enough memory headroom, especially if the TTS models are loaded at the
-# same time. If you hit OOM on deploy, fall back to nllb-200-distilled-1.3B
-# (a distilled version that's lighter than the full 1.3B) as a middle ground.
-MODEL_ID = "facebook/nllb-200-1.3B"
+# Using the "lite" distilled 600M checkpoint rather than the full 1.3B.
+# This app targets grade 1-5 pupils, so lesson content is short, simple
+# sentences - the gap in translation quality between 600M and 1.3B mostly
+# shows up on long/complex sentences, which isn't what this audience needs.
+# The 600M model is also ~2x lighter on RAM and meaningfully faster per
+# request, which matters more here than squeezing out marginal quality on
+# vocabulary these lessons won't use anyway. Most of the earlier translation
+# problems (repetition loops, mid-sentence truncation) were decoding bugs,
+# not a model-size issue - those fixes (beam search, no_repeat_ngram_size,
+# sentence-level splitting) apply here too and are what actually matters.
+MODEL_ID = "facebook/nllb-200-distilled-600M"
 SRC_LANG = "eng_Latn"
 TGT_LANG = "bem_Latn"
 
@@ -47,6 +49,9 @@ TTS_MODEL_IDS = {
 }
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "lessons.db")
+
+# The fixed set of subjects pupils see on Home / Lessons / Progress.
+SUBJECTS = ["Maths", "Literacy", "Science", "CTS"]
 
 # IMPORTANT: set a real SECRET_KEY env var on Railway. This fallback is only
 # for local/dev use - if it's left as-is in production, anyone can forge
@@ -105,6 +110,19 @@ def init_db():
                 password_hash TEXT NOT NULL,
                 role TEXT NOT NULL CHECK(role IN ('pupil', 'teacher')),
                 created_at TEXT NOT NULL
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS progress (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                subject TEXT NOT NULL,
+                viewed INTEGER NOT NULL DEFAULT 0,
+                listened INTEGER NOT NULL DEFAULT 0,
+                updated_at TEXT NOT NULL,
+                UNIQUE(user_id, subject)
             )
             """
         )
@@ -332,6 +350,20 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class UpdateProfileRequest(BaseModel):
+    name: str
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+
+class ProgressUpdateRequest(BaseModel):
+    subject: str
+    event: str  # "viewed" or "listened"
+
+
 # ---------------------------------------------------------------------------
 # Frontend routes
 # ---------------------------------------------------------------------------
@@ -364,6 +396,11 @@ def progress_page():
 @app.get("/profile")
 def profile_page():
     return FileResponse(os.path.join(STATIC_DIR, "profile.html"))
+
+
+@app.get("/account-settings")
+def account_settings_page():
+    return FileResponse(os.path.join(STATIC_DIR, "account-settings.html"))
 
 
 @app.get("/login")
@@ -431,6 +468,96 @@ def login(req: LoginRequest):
 @app.get("/api/auth/me")
 def me(user: sqlite3.Row = Depends(get_current_user)):
     return user_to_dict(user)
+
+
+@app.put("/api/auth/me")
+def update_me(req: UpdateProfileRequest, user: sqlite3.Row = Depends(get_current_user)):
+    name = req.name.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Name cannot be empty")
+
+    with get_db() as conn:
+        conn.execute("UPDATE users SET name = ? WHERE id = ?", (name, user["id"]))
+        row = conn.execute("SELECT * FROM users WHERE id = ?", (user["id"],)).fetchone()
+
+    return user_to_dict(row)
+
+
+@app.post("/api/auth/change-password")
+def change_password(req: ChangePasswordRequest, user: sqlite3.Row = Depends(get_current_user)):
+    if not verify_password(req.current_password, user["password_hash"]):
+        raise HTTPException(status_code=401, detail="Current password is incorrect")
+    if len(req.new_password) < 6:
+        raise HTTPException(status_code=400, detail="New password must be at least 6 characters")
+
+    new_hash = hash_password(req.new_password)
+    with get_db() as conn:
+        conn.execute("UPDATE users SET password_hash = ? WHERE id = ?", (new_hash, user["id"]))
+
+    return {"ok": True}
+
+
+# ---------------------------------------------------------------------------
+# Progress tracking (pupils only)
+# ---------------------------------------------------------------------------
+# Kept deliberately simple for a grade 1-5 audience: each subject is either
+# not started (0%), opened (50%), or opened AND had its audio played (100%).
+# There's no per-lesson granularity since each subject only ever has one
+# "current" lesson (the latest one a teacher posted).
+
+@app.post("/api/progress")
+def update_progress(req: ProgressUpdateRequest, user: sqlite3.Row = Depends(get_current_user)):
+    if user["role"] != "pupil":
+        # Teachers can open /lesson to preview content; that shouldn't
+        # create or affect any pupil's progress record.
+        return {"ok": True, "skipped": True}
+    if req.event not in ("viewed", "listened"):
+        raise HTTPException(status_code=400, detail="event must be 'viewed' or 'listened'")
+
+    updated_at = datetime.now(timezone.utc).isoformat()
+    with get_db() as conn:
+        existing = conn.execute(
+            "SELECT * FROM progress WHERE user_id = ? AND subject = ?",
+            (user["id"], req.subject),
+        ).fetchone()
+
+        if existing is None:
+            conn.execute(
+                "INSERT INTO progress (user_id, subject, viewed, listened, updated_at) VALUES (?, ?, ?, ?, ?)",
+                (user["id"], req.subject, 1, 1 if req.event == "listened" else 0, updated_at),
+            )
+        else:
+            listened = existing["listened"] or (1 if req.event == "listened" else 0)
+            conn.execute(
+                "UPDATE progress SET viewed = 1, listened = ?, updated_at = ? WHERE id = ?",
+                (listened, updated_at, existing["id"]),
+            )
+
+    return {"ok": True}
+
+
+@app.get("/api/progress")
+def get_progress(user: sqlite3.Row = Depends(get_current_user)):
+    with get_db() as conn:
+        rows = conn.execute(
+            "SELECT subject, viewed, listened FROM progress WHERE user_id = ?",
+            (user["id"],),
+        ).fetchall()
+    by_subject = {row["subject"]: row for row in rows}
+
+    result = []
+    for subject in SUBJECTS:
+        row = by_subject.get(subject)
+        if row is None:
+            pct = 0
+        elif row["listened"]:
+            pct = 100
+        elif row["viewed"]:
+            pct = 50
+        else:
+            pct = 0
+        result.append({"subject": subject, "pct": pct})
+    return result
 
 
 # ---------------------------------------------------------------------------

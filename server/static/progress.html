@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Progress — Steam on Wheels</title>
   <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
-  <link href="/static/output.css?v=2" rel="stylesheet" />
+  <link href="/static/output.css?v=3" rel="stylesheet" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -35,9 +35,6 @@
       <a href="/progress" class="sidebar-item active"><svg viewBox="0 0 24 24" fill="none"><path d="M5 20V12M12 20V6M19 20V15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Progress</a>
       <a href="/profile" class="sidebar-item"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="2"/><path d="M4.5 20C5.5 16 8.5 14 12 14C15.5 14 18.5 16 19.5 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Profile</a>
     </nav>
-    <div class="mt-auto pt-4 border-t border-white/10">
-      <a href="/upload" class="sidebar-item"><svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4M12 4L7 9M12 4L17 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16V18.5C4 19.3 4.7 20 5.5 20H18.5C19.3 20 20 19.3 20 18.5V16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Teacher access</a>
-    </div>
   </aside>
     <div class="flex-1 flex justify-center">
       <div class="w-full max-w-md md:max-w-3xl px-5 md:px-10 pt-8 md:pt-10 pb-28 md:pb-10">
@@ -63,16 +60,10 @@
     <a href="/progress" class="nav-item active"><svg viewBox="0 0 24 24" fill="none"><path d="M5 20V12M12 20V6M19 20V15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Progress</span></a>
     <a href="/profile" class="nav-item"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="2"/><path d="M4.5 20C5.5 16 8.5 14 12 14C15.5 14 18.5 16 19.5 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Profile</span></a>
   </nav>
-  <script src="/static/auth.js"></script>
+  <script src="/static/auth.js?v=3"></script>
   <script>
-    // PLACEHOLDER DATA — no real progress-tracking backend exists yet.
-    // Replace this with a fetch('/api/progress') once that endpoint exists.
-    const MOCK_PROGRESS = [
-      { subject: 'Science', pct: 75 },
-      { subject: 'Maths', pct: 30 },
-      { subject: 'Literacy', pct: 0 },
-      { subject: 'CTS', pct: 0 },
-    ];
+    const SUBJECTS = ['Maths', 'Literacy', 'Science', 'CTS'];
+    let progressData = SUBJECTS.map(subject => ({ subject, pct: 0 }));
 
     let isBemba = true;
     const pageTitle = document.getElementById('pageTitle');
@@ -81,9 +72,18 @@
     const progressList = document.getElementById('progressList');
     const CONTINUE_LABEL = { bem: 'Konkanyapo uku sambilila', eng: 'Continue learning' };
 
+    async function fetchProgress() {
+      try {
+        const res = await authFetch('/api/progress');
+        progressData = await res.json();
+      } catch (e) {
+        // Keep the all-zero defaults if the request fails.
+      }
+    }
+
     function render() {
       progressList.innerHTML = '';
-      MOCK_PROGRESS.forEach(({ subject, pct }) => {
+      progressData.forEach(({ subject, pct }) => {
         const card = document.createElement('div');
         card.className = 'progress-card flex flex-col items-center gap-4';
         card.innerHTML = `
@@ -116,6 +116,7 @@
     (async () => {
       const user = await requireAuth('pupil');
       if (!user) return;
+      await fetchProgress();
       updateLanguage();
     })();
   </script>

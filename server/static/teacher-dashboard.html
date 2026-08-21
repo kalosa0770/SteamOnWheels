@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Teacher Dashboard — Steam on Wheels</title>
   <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
-  <link href="/static/output.css?v=2" rel="stylesheet" />
+  <link href="/static/output.css?v=3" rel="stylesheet" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -27,7 +27,6 @@
     <div class="flex-1 flex justify-center">
       <div class="w-full max-w-md md:max-w-3xl px-5 md:px-10 pt-8 md:pt-10 pb-28 md:pb-10">
         <div class="flex items-center justify-between md:justify-end">
-          <button onclick="logout()" class="md:hidden flex items-center gap-2 border-0 bg-transparent cursor-pointer text-sm font-semibold text-navy/60">Log out</button>
           <span class="hidden md:inline text-xs font-bold text-navy/40 tracking-widest uppercase">Teacher dashboard</span>
         </div>
 
@@ -49,9 +48,10 @@
   <nav class="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-md h-16 bg-navy-deep rounded-full flex items-center px-2 shadow-xl z-40">
     <a href="/teacher/dashboard" class="nav-item active"><svg viewBox="0 0 24 24" fill="none"><path d="M4 11L12 4L20 11V19C20 19.55 19.55 20 19 20H15V14H9V20H5C4.45 20 4 19.55 4 19V11Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Dashboard</span></a>
     <a href="/upload" class="nav-item"><svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4M12 4L7 9M12 4L17 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16V18.5C4 19.3 4.7 20 5.5 20H18.5C19.3 20 20 19.3 20 18.5V16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Upload</span></a>
+    <button onclick="logout()" class="nav-item border-0 bg-transparent cursor-pointer"><svg viewBox="0 0 24 24" fill="none"><path d="M9 8V6.5C9 5.12 10.12 4 11.5 4H17.5C18.88 4 20 5.12 20 6.5V17.5C20 18.88 18.88 20 17.5 20H11.5C10.12 20 9 18.88 9 17.5V16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M13 12H4M4 12L7.5 8.5M4 12L7.5 15.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Log out</span></button>
   </nav>
 
-  <script src="/static/auth.js"></script>
+  <script src="/static/auth.js?v=3"></script>
   <script>
     const greeting = document.getElementById('greeting');
     const lessonsList = document.getElementById('lessonsList');

@@ -32,4 +32,9 @@ body {
   .settings-row { @apply w-full flex items-center justify-between bg-white rounded-2xl px-5 py-4 text-left cursor-pointer border-0; }
   .settings-row-label { @apply font-display font-bold text-navy text-[15px]; }
   .progress-card { @apply bg-white rounded-2xl p-5; }
+
+  /* Show/hide toggle button sitting inside a password input. Pair with an
+     input that has "relative" on its wrapper and "pr-11" for icon clearance. */
+  .password-toggle-btn { @apply absolute top-1/2 right-2.5 -translate-y-1/2 flex items-center bg-transparent border-0 p-1.5 m-0 cursor-pointer text-navy/50 hover:text-navy transition; }
+  .password-toggle-btn svg { @apply w-[18px] h-[18px]; }
 }

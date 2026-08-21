@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lesson — Steam on Wheels</title>
   <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
-  <link href="/static/output.css?v=2" rel="stylesheet" />
+  <link href="/static/output.css?v=3" rel="stylesheet" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -35,9 +35,6 @@
       <a href="/progress" class="sidebar-item"><svg viewBox="0 0 24 24" fill="none"><path d="M5 20V12M12 20V6M19 20V15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Progress</a>
       <a href="/profile" class="sidebar-item"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="2"/><path d="M4.5 20C5.5 16 8.5 14 12 14C15.5 14 18.5 16 19.5 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Profile</a>
     </nav>
-    <div class="mt-auto pt-4 border-t border-white/10">
-      <a href="/upload" class="sidebar-item"><svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4M12 4L7 9M12 4L17 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16V18.5C4 19.3 4.7 20 5.5 20H18.5C19.3 20 20 19.3 20 18.5V16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Teacher access</a>
-    </div>
   </aside>
     <div class="flex-1 flex justify-center">
       <div class="w-full max-w-md md:max-w-3xl px-5 md:px-10 pt-8 md:pt-10 pb-10">
@@ -63,7 +60,7 @@
     </div>
   </div>
   
-  <script src="/static/auth.js"></script>
+  <script src="/static/auth.js?v=3"></script>
   <script>
     let isBemba = true;
     let lessonData = null;
@@ -97,10 +94,24 @@
       }
     }
 
+    // Fire-and-forget: records "viewed"/"listened" progress for this pupil.
+    // The backend silently no-ops this for teachers previewing a lesson.
+    async function recordProgress(event) {
+      try {
+        await authFetch('/api/progress', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ subject, event }),
+        });
+      } catch (e) {
+        // Non-critical — don't interrupt the lesson if this fails.
+      }
+    }
+
     async function loadLesson() {
       try {
         const res = await authFetch(`/api/lessons/${encodeURIComponent(subject)}`);
         lessonData = await res.json();
+        recordProgress('viewed');
       } catch (err) {
         lessonData = {
           topic_en: 'Could not load lesson', topic_bem: 'Tafwile ukusanga amasambililo',
@@ -131,6 +142,7 @@
         currentAudio = new Audio(url);
         currentAudio.play();
         currentAudio.onended = () => URL.revokeObjectURL(url);
+        recordProgress('listened');
       } catch (err) {
         if (!isBemba && speechSynth) {
           speechSynth.cancel();
