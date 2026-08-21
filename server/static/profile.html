@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile — Steam on Wheels</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style type="text/tailwindcss">
+    @theme {
+      --color-navy: #0B4A57;
+      --color-navy-deep: #073540;
+      --color-orange: #FF7A00;
+      --color-orange-dark: #E56A00;
+      --color-bg: #F0F0F0;
+      --font-display: "Baloo 2", sans-serif;
+    }
+    body { font-family: 'Inter', sans-serif; }
+    @layer components {
+      .sidebar-item { @apply flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-white/55 hover:text-white hover:bg-white/10 transition; }
+      .sidebar-item svg { @apply w-5 h-5 shrink-0; }
+      .sidebar-item.active { @apply bg-orange text-white; }
+      .nav-item { @apply flex-1 h-full flex flex-col items-center justify-center gap-0.5 text-[11px] font-semibold text-white/45; }
+      .nav-item svg { @apply w-5 h-5; }
+      .nav-item.active { @apply text-white; }
+      .subject-btn { @apply bg-white rounded-2xl h-28 md:h-32 flex items-center justify-center text-center font-display font-bold text-navy text-[15px] shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition cursor-pointer border-0 p-3; }
+      .lang-toggle { @apply flex items-center gap-1 bg-white border border-black/10 rounded-full p-1 cursor-pointer shrink-0; }
+      .lang-toggle span { @apply text-[11px] font-bold px-3 py-1.5 rounded-full text-navy/45 transition; }
+      .lang-toggle span.active { @apply bg-orange text-white; }
+      .settings-row { @apply w-full flex items-center justify-between bg-white rounded-2xl px-5 py-4 text-left cursor-pointer border-0; }
+      .settings-row-label { @apply font-display font-bold text-navy text-[15px]; }
+      .progress-card { @apply bg-white rounded-2xl p-5; }
+    }
+  </style>
+</head>
+<body class="bg-bg text-navy">
+  <div class="min-h-screen flex">
+    <aside class="hidden md:flex md:flex-col md:w-64 md:shrink-0 bg-navy-deep text-white px-4 py-6 gap-1">
+    <div class="flex items-center gap-2 px-2 mb-6">
+      <svg class="w-9 h-9 shrink-0" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="24" cy="24" r="19" fill="#FF7A00"/>
+  <path d="M24 6V42M6 24H42" stroke="white" stroke-width="1.5" opacity="0.5"/>
+  <circle cx="15.5" cy="16" r="3.6" stroke="white" stroke-width="1.6"/>
+  <path d="M15.5 19.5V24M13 24H18" stroke="white" stroke-width="1.6" stroke-linecap="round"/>
+  <circle cx="32" cy="16" r="1.6" fill="white"/>
+  <ellipse cx="32" cy="16" rx="6" ry="2.6" stroke="white" stroke-width="1.4"/>
+  <ellipse cx="32" cy="16" rx="6" ry="2.6" stroke="white" stroke-width="1.4" transform="rotate(60 32 16)"/>
+  <ellipse cx="32" cy="16" rx="6" ry="2.6" stroke="white" stroke-width="1.4" transform="rotate(120 32 16)"/>
+  <rect x="12" y="29" width="8" height="7" rx="1" stroke="white" stroke-width="1.4"/>
+  <path d="M14 32H18M14 34H18" stroke="white" stroke-width="1.2"/>
+  <circle cx="32" cy="32.5" r="4" stroke="white" stroke-width="1.5"/>
+  <path d="M32 27.3V29M32 36V37.7M27.3 32.5H29M35 32.5H36.7M28.6 29.1L29.8 30.3M35.4 35.9L34.2 34.7M28.6 35.9L29.8 34.7M35.4 29.1L34.2 30.3" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
+</svg>
+      <span class="font-display font-extrabold text-base leading-tight">STEAM<br><span class="text-[9px] tracking-widest text-orange uppercase font-semibold" style="font-family:'Inter',sans-serif">on wheels</span></span>
+    </div>
+    <nav class="flex flex-col gap-1">
+      <a href="/" class="sidebar-item"><svg viewBox="0 0 24 24" fill="none"><path d="M4 11L12 4L20 11V19C20 19.55 19.55 20 19 20H15V14H9V20H5C4.45 20 4 19.55 4 19V11Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>Home</a>
+      <a href="/lessons" class="sidebar-item"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5.5C4 4.67 4.67 4 5.5 4H11V19H5.5C4.67 19 4 18.33 4 17.5V5.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M20 5.5C20 4.67 19.33 4 18.5 4H13V19H18.5C19.33 19 20 18.33 20 17.5V5.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>Lessons</a>
+      <a href="/progress" class="sidebar-item"><svg viewBox="0 0 24 24" fill="none"><path d="M5 20V12M12 20V6M19 20V15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Progress</a>
+      <a href="/profile" class="sidebar-item active"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="2"/><path d="M4.5 20C5.5 16 8.5 14 12 14C15.5 14 18.5 16 19.5 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Profile</a>
+    </nav>
+    <div class="mt-auto pt-4 border-t border-white/10">
+      <a href="/upload" class="sidebar-item"><svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4M12 4L7 9M12 4L17 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16V18.5C4 19.3 4.7 20 5.5 20H18.5C19.3 20 20 19.3 20 18.5V16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Teacher access</a>
+    </div>
+  </aside>
+    <div class="flex-1 flex justify-center">
+      <div class="w-full max-w-md md:max-w-3xl px-5 md:px-10 pt-8 md:pt-10 pb-28 md:pb-10">
+        <div class="bg-orange -mx-5 md:-mx-10 -mt-8 md:-mt-10 px-5 md:px-10 pt-8 md:pt-10 pb-10 rounded-b-[28px] md:rounded-[28px] md:mb-8">
+          <div class="flex items-center justify-between">
+            <span></span>
+            <div class="lang-toggle" id="langToggleTop">
+              <span id="langEngTop">ENG</span><span id="langBemTop" class="active">BEM</span>
+            </div>
+          </div>
+          <div class="flex flex-col items-center mt-8 md:mt-10">
+            <div class="w-20 h-20 rounded-full bg-white flex items-center justify-center font-display font-bold text-2xl text-navy">MS</div>
+            <div class="font-display font-extrabold text-white text-xl mt-4">Micheal Sichuna</div>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-4 mt-6 md:mt-0">
+          <div class="settings-row">
+            <span class="settings-row-label">Language</span>
+            <div class="lang-toggle" id="langToggle" onclick="event.stopPropagation()">
+              <span id="langEng">ENG</span><span id="langBem" class="active">BEM</span>
+            </div>
+          </div>
+
+          <button class="settings-row" onclick="alert('Account settings isn\'t built yet — this is a placeholder for the real screen.')">
+            <span class="settings-row-label">Account Settings</span><svg class="w-4 h-4 text-navy/40" viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+
+          <button class="settings-row" onclick="window.location.href='/lessons'">
+            <span class="settings-row-label">Recorded Lessons</span><svg class="w-4 h-4 text-navy/40" viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+
+          <button class="w-full h-14 bg-navy-deep text-white rounded-full font-display font-bold mt-2 border-0 cursor-pointer" onclick="if(confirm('Log out?')) window.location.href='/'">Log Out</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <nav class="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-md h-16 bg-navy-deep rounded-full flex items-center px-2 shadow-xl z-40">
+    <a href="/" class="nav-item"><svg viewBox="0 0 24 24" fill="none"><path d="M4 11L12 4L20 11V19C20 19.55 19.55 20 19 20H15V14H9V20H5C4.45 20 4 19.55 4 19V11Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Home</span></a>
+    <a href="/lessons" class="nav-item"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5.5C4 4.67 4.67 4 5.5 4H11V19H5.5C4.67 19 4 18.33 4 17.5V5.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M20 5.5C20 4.67 19.33 4 18.5 4H13V19H18.5C19.33 19 20 18.33 20 17.5V5.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Lessons</span></a>
+    <a href="/progress" class="nav-item"><svg viewBox="0 0 24 24" fill="none"><path d="M5 20V12M12 20V6M19 20V15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Progress</span></a>
+    <a href="/profile" class="nav-item active"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="2"/><path d="M4.5 20C5.5 16 8.5 14 12 14C15.5 14 18.5 16 19.5 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Profile</span></a>
+  </nav>
+  <script>
+    // NOTE: "Micheal Sichuna" / "MS" is hardcoded demo data — see comment above.
+    let isBemba = true;
+    const langEng = document.getElementById('langEng');
+    const langBem = document.getElementById('langBem');
+    const langEngTop = document.getElementById('langEngTop');
+    const langBemTop = document.getElementById('langBemTop');
+
+    function updateLanguage() {
+      [langEng, langEngTop].forEach(el => el.classList.toggle('active', !isBemba));
+      [langBem, langBemTop].forEach(el => el.classList.toggle('active', isBemba));
+    }
+    function toggle() { isBemba = !isBemba; updateLanguage(); }
+    document.getElementById('langToggle').addEventListener('click', toggle);
+    document.getElementById('langToggleTop').addEventListener('click', toggle);
+  </script>
+</body>
+</html>

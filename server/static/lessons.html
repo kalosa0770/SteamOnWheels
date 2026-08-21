@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lesson — Steam on Wheels</title>
+  <title>Lessons — Steam on Wheels</title>
   <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -66,113 +66,73 @@
     </div>
   </aside>
     <div class="flex-1 flex justify-center">
-      <div class="w-full max-w-md md:max-w-3xl px-5 md:px-10 pt-8 md:pt-10 pb-10">
-        <div class="flex items-center justify-between">
-          <button onclick="history.back()" class="flex items-center gap-1 font-display font-bold text-[15px] border-0 bg-transparent cursor-pointer"><svg viewBox="0 0 24 24" fill="none" class="w-4 h-4"><path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Back</button>
+      <div class="w-full max-w-md md:max-w-3xl px-5 md:px-10 pt-8 md:pt-10 pb-28 md:pb-10">
+        <div class="flex items-center justify-between md:justify-end">
+          <span class="md:hidden"></span>
           <div class="lang-toggle" id="langToggle">
             <span id="langEng">ENG</span><span id="langBem" class="active">BEM</span>
           </div>
         </div>
 
-        <h1 id="lessonSubject" class="font-display font-extrabold text-2xl md:text-3xl mt-6">Loading…</h1>
-        <p id="lessonTopic" class="text-navy/55 text-sm mt-1"></p>
+        <h1 id="pageTitle" class="font-display font-extrabold text-2xl md:text-3xl mt-6">Amasambililo Yonse</h1>
 
         <div class="bg-orange rounded-[28px] mt-6 p-5 md:p-8">
-          <p id="lessonBody" class="whitespace-pre-line leading-relaxed text-[15px] md:text-base">Loading lesson…</p>
+          <div id="lessonsList" class="grid md:grid-cols-2 gap-4"></div>
         </div>
-
-        <button id="btnListenAudio" class="fixed md:static bottom-4 left-1/2 md:left-auto -translate-x-1/2 md:translate-x-0 w-[calc(100%-2.5rem)] md:w-full max-w-md md:max-w-none mx-auto md:mx-0 h-14 bg-navy-deep text-white rounded-full font-display font-bold flex items-center justify-center gap-2 shadow-xl z-30 mt-6 border-0 cursor-pointer disabled:opacity-60">
-          <svg viewBox="0 0 24 24" fill="none" class="w-[18px] h-[18px]"><path d="M5 9V15H9L14 20V4L9 9H5Z" fill="currentColor"/><path d="M17.5 8.5C18.5 9.5 19 10.7 19 12C19 13.3 18.5 14.5 17.5 15.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span id="audioLabel">Play - Kutikeni ku fyebo</span>
-        </button>
 
       </div>
     </div>
   </div>
-  
+  <nav class="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-md h-16 bg-navy-deep rounded-full flex items-center px-2 shadow-xl z-40">
+    <a href="/" class="nav-item"><svg viewBox="0 0 24 24" fill="none"><path d="M4 11L12 4L20 11V19C20 19.55 19.55 20 19 20H15V14H9V20H5C4.45 20 4 19.55 4 19V11Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Home</span></a>
+    <a href="/lessons" class="nav-item active"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5.5C4 4.67 4.67 4 5.5 4H11V19H5.5C4.67 19 4 18.33 4 17.5V5.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M20 5.5C20 4.67 19.33 4 18.5 4H13V19H18.5C19.33 19 20 18.33 20 17.5V5.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Lessons</span></a>
+    <a href="/progress" class="nav-item"><svg viewBox="0 0 24 24" fill="none"><path d="M5 20V12M12 20V6M19 20V15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Progress</span></a>
+    <a href="/profile" class="nav-item"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="2"/><path d="M4.5 20C5.5 16 8.5 14 12 14C15.5 14 18.5 16 19.5 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Profile</span></a>
+  </nav>
   <script>
+    const SUBJECTS = ['Maths', 'Literacy', 'Science', 'CTS'];
     let isBemba = true;
-    let lessonData = null;
-    let currentAudio = null;
-    let speechSynth = window.speechSynthesis;
-
-    const params = new URLSearchParams(window.location.search);
-    const subject = params.get('subject') || 'Science';
-
-    const lessonSubject = document.getElementById('lessonSubject');
-    const lessonTopic = document.getElementById('lessonTopic');
-    const lessonBody = document.getElementById('lessonBody');
-    const btnListenAudio = document.getElementById('btnListenAudio');
-    const audioLabel = document.getElementById('audioLabel');
+    const pageTitle = document.getElementById('pageTitle');
     const langEng = document.getElementById('langEng');
     const langBem = document.getElementById('langBem');
+    const lessonsList = document.getElementById('lessonsList');
+    const OPEN_LABEL = { bem: 'Fungulani ilyashi', eng: 'Open lesson' };
 
-    function updateDisplay() {
-      lessonSubject.textContent = subject;
-      if (!lessonData) return;
-      if (isBemba) {
-        lessonTopic.textContent = lessonData.topic_bem;
-        lessonBody.textContent = lessonData.content_bem;
-        audioLabel.textContent = 'Play - Kutikeni ku fyebo';
-        langBem.classList.add('active'); langEng.classList.remove('active');
-      } else {
-        lessonTopic.textContent = lessonData.topic_en;
-        lessonBody.textContent = lessonData.content_en;
-        audioLabel.textContent = 'Play - Listen to Lesson';
-        langEng.classList.add('active'); langBem.classList.remove('active');
+    async function loadLessons() {
+      lessonsList.innerHTML = '';
+      for (const subject of SUBJECTS) {
+        let data;
+        try {
+          const res = await fetch(`/api/lessons/${encodeURIComponent(subject)}`);
+          data = await res.json();
+        } catch (e) { continue; }
+
+        const topic = isBemba ? data.topic_bem : data.topic_en;
+        const card = document.createElement('div');
+        card.className = 'progress-card flex flex-col gap-3';
+        card.innerHTML = `
+          <div class="font-display font-bold text-navy text-sm tracking-wide uppercase">${subject}</div>
+          <div class="text-navy/60 text-sm">${topic}</div>
+          <button data-subject="${subject}" class="mt-1 flex items-center gap-1.5 text-orange-dark font-semibold text-sm border-0 bg-transparent cursor-pointer self-start">
+            <span>${isBemba ? OPEN_LABEL.bem : OPEN_LABEL.eng}</span><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        `;
+        lessonsList.appendChild(card);
       }
-    }
-
-    async function loadLesson() {
-      try {
-        const res = await fetch(`/api/lessons/${encodeURIComponent(subject)}`);
-        lessonData = await res.json();
-      } catch (err) {
-        lessonData = {
-          topic_en: 'Could not load lesson', topic_bem: 'Tafwile ukusanga amasambililo',
-          content_en: 'There was a problem reaching the server. Please try again later.',
-          content_bem: 'Kwaliba ubwafya bwa kuya ku seva. Mwesheni na kabili.',
-        };
-      }
-      updateDisplay();
-    }
-
-    document.getElementById('langToggle').addEventListener('click', () => { isBemba = !isBemba; updateDisplay(); });
-
-    async function playAudio() {
-      const text = lessonBody.textContent;
-      if (!text) return;
-      if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-      const originalLabel = audioLabel.textContent;
-      audioLabel.textContent = 'Loading audio…';
-      btnListenAudio.disabled = true;
-      try {
-        const res = await fetch('/api/tts', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text, lang: isBemba ? 'bem' : 'eng' }),
+      lessonsList.querySelectorAll('button[data-subject]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          window.location.href = `/lesson?subject=${encodeURIComponent(btn.dataset.subject)}`;
         });
-        if (!res.ok) throw new Error('TTS request failed');
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        currentAudio = new Audio(url);
-        currentAudio.play();
-        currentAudio.onended = () => URL.revokeObjectURL(url);
-      } catch (err) {
-        if (!isBemba && speechSynth) {
-          speechSynth.cancel();
-          const utterance = new SpeechSynthesisUtterance(text);
-          utterance.lang = 'en-US';
-          speechSynth.speak(utterance);
-        } else {
-          alert('Could not generate audio right now. Please try again in a moment.');
-        }
-      } finally {
-        audioLabel.textContent = originalLabel;
-        btnListenAudio.disabled = false;
-      }
+      });
     }
-    btnListenAudio.addEventListener('click', playAudio);
 
-    loadLesson();
+    function updateLanguage() {
+      pageTitle.textContent = isBemba ? 'Amasambililo Yonse' : 'All Lessons';
+      if (isBemba) { langBem.classList.add('active'); langEng.classList.remove('active'); }
+      else { langEng.classList.add('active'); langBem.classList.remove('active'); }
+      loadLessons();
+    }
+    document.getElementById('langToggle').addEventListener('click', () => { isBemba = !isBemba; updateLanguage(); });
+    updateLanguage();
   </script>
 </body>
 </html>

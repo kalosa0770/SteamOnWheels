@@ -5,45 +5,67 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Upload Lesson — Steam on Wheels</title>
   <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="/static/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style type="text/tailwindcss">
+    @theme {
+      --color-navy: #0B4A57;
+      --color-navy-deep: #073540;
+      --color-orange: #FF7A00;
+      --color-orange-dark: #E56A00;
+      --color-bg: #F0F0F0;
+      --font-display: "Baloo 2", sans-serif;
+    }
+    body { font-family: 'Inter', sans-serif; }
+    @layer components {
+      .sidebar-item { @apply flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-white/55 hover:text-white hover:bg-white/10 transition; }
+      .sidebar-item svg { @apply w-5 h-5 shrink-0; }
+      .sidebar-item.active { @apply bg-orange text-white; }
+      .nav-item { @apply flex-1 h-full flex flex-col items-center justify-center gap-0.5 text-[11px] font-semibold text-white/45; }
+      .nav-item svg { @apply w-5 h-5; }
+      .nav-item.active { @apply text-white; }
+      .subject-btn { @apply bg-white rounded-2xl h-28 md:h-32 flex items-center justify-center text-center font-display font-bold text-navy text-[15px] shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition cursor-pointer border-0 p-3; }
+      .lang-toggle { @apply flex items-center gap-1 bg-white border border-black/10 rounded-full p-1 cursor-pointer shrink-0; }
+      .lang-toggle span { @apply text-[11px] font-bold px-3 py-1.5 rounded-full text-navy/45 transition; }
+      .lang-toggle span.active { @apply bg-orange text-white; }
+      .settings-row { @apply w-full flex items-center justify-between bg-white rounded-2xl px-5 py-4 text-left cursor-pointer border-0; }
+      .settings-row-label { @apply font-display font-bold text-navy text-[15px]; }
+      .progress-card { @apply bg-white rounded-2xl p-5; }
+    }
+  </style>
 </head>
-<body>
-  <div class="screen">
-    <div class="top-bar">
-      <button class="back-btn" onclick="window.location.href='/'">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Back
-      </button>
-    </div>
+<body class="bg-bg text-navy min-h-screen flex justify-center">
+  <div class="w-full max-w-md md:max-w-lg px-5 pt-8 pb-16">
+    <button onclick="location.href='/'" class="flex items-center gap-1 font-display font-bold text-[15px] border-0 bg-transparent cursor-pointer"><svg viewBox="0 0 24 24" fill="none" class="w-4 h-4"><path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Back</button>
 
-    <div class="upload-header">
-      <div class="upload-eyebrow">
-        <span class="route-dot"></span>
-        Teacher access
+    <div class="mt-6">
+      <div class="flex items-center gap-2 text-orange-dark text-[11px] font-bold tracking-widest uppercase">
+        <span class="w-2 h-2 rounded-full bg-orange"></span>Teacher access
       </div>
-      <div class="upload-title">Upload educational content</div>
-      <div class="upload-subtitle">Enter English content below — the AI model will translate it to Bemba automatically before saving. Students won't see this screen; it's only reachable from the STEAM logo.</div>
+      <h1 class="font-display font-extrabold text-2xl mt-2">Upload educational content</h1>
+      <p class="text-navy/55 text-sm mt-2 leading-relaxed">Enter English content below — the AI model will translate it to Bemba automatically before saving. Students won't see this screen; it's only reachable from the STEAM logo.</p>
     </div>
 
-    <div class="field-group">
-      <label class="field-label" for="etSubject">Subject</label>
-      <input class="field" id="etSubject" placeholder="e.g. Science, Maths" />
+    <div class="mt-6">
+      <label class="block text-xs font-bold text-navy mb-1.5" for="etSubject">Subject</label>
+      <input class="w-full px-4 py-3 rounded-xl border border-black/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-orange" id="etSubject" placeholder="e.g. Science, Maths" />
     </div>
 
-    <div class="field-group">
-      <label class="field-label" for="etTopicEnglish">Topic title (English)</label>
-      <input class="field" id="etTopicEnglish" placeholder="e.g. Domestic and Wild Animals" />
+    <div class="mt-4">
+      <label class="block text-xs font-bold text-navy mb-1.5" for="etTopicEnglish">Topic title (English)</label>
+      <input class="w-full px-4 py-3 rounded-xl border border-black/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-orange" id="etTopicEnglish" placeholder="e.g. Domestic and Wild Animals" />
     </div>
 
-    <div class="field-group">
-      <label class="field-label" for="etContentEnglish">Lesson body (English)</label>
-      <textarea class="field" id="etContentEnglish" placeholder="Write the lesson content here…"></textarea>
+    <div class="mt-4">
+      <label class="block text-xs font-bold text-navy mb-1.5" for="etContentEnglish">Lesson body (English)</label>
+      <textarea class="w-full px-4 py-3 rounded-xl border border-black/10 bg-white text-sm min-h-32 focus:outline-none focus:ring-2 focus:ring-orange" id="etContentEnglish" placeholder="Write the lesson content here…"></textarea>
     </div>
 
-    <button class="submit-btn" id="btnUploadTranslate">Auto-translate &amp; save</button>
+    <button id="btnUploadTranslate" class="w-full h-14 bg-orange hover:bg-orange-dark text-white rounded-full font-display font-bold mt-6 border-0 cursor-pointer disabled:opacity-60">Auto-translate &amp; save</button>
 
-    <div class="status-box" id="tvAutoTranslateStatus">
-      <span class="status-label">AI status</span>
+    <div class="mt-5 p-4 rounded-xl border border-black/10 bg-white text-sm leading-relaxed whitespace-pre-line">
+      <span class="block text-[10px] font-bold text-navy/50 tracking-widest uppercase mb-1.5">AI status</span>
       <span id="statusText">Waiting for input…</span>
     </div>
   </div>
@@ -59,30 +81,21 @@
       const subject = etSubject.value.trim();
       const topicEn = etTopicEnglish.value.trim();
       const contentEn = etContentEnglish.value.trim();
-
-      if (!subject || !topicEn || !contentEn) {
-        alert('Please fill in all fields');
-        return;
-      }
+      if (!subject || !topicEn || !contentEn) { alert('Please fill in all fields'); return; }
 
       statusText.textContent = 'Translating topic and content to Bemba…';
       btnUploadTranslate.disabled = true;
-
       try {
         const res = await fetch('/api/lessons', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ subject, topic_en: topicEn, content_en: contentEn }),
         });
-
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
           throw new Error(err.detail || `Server error (${res.status})`);
         }
-
         const saved = await res.json();
-        statusText.textContent =
-          `Saved!\n\nBemba topic: ${saved.topic_bem}\n\nBemba content:\n${saved.content_bem}`;
+        statusText.textContent = `Saved!\n\nBemba topic: ${saved.topic_bem}\n\nBemba content:\n${saved.content_bem}`;
         alert(`Saved to ${subject}! Check the lesson screen.`);
       } catch (err) {
         statusText.textContent = `Error: ${err.message}`;

@@ -8,8 +8,8 @@ import java.util.concurrent.TimeUnit;
 
 public class TranslationService {
 
-    // Live Production Fly.io API URL
-    private static final String API_URL = "https://steamonwheels.fly.dev/translate";
+    // Live Production Railway API URL
+    private static final String API_URL = "https://steamonwheels-production.up.railway.app/translate";
 
     private final OkHttpClient client = new OkHttpClient.Builder()
             .connectTimeout(60, TimeUnit.SECONDS)

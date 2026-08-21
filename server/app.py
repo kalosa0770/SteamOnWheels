@@ -15,7 +15,7 @@ from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, VitsModel, AutoTo
 
 app = FastAPI(title="Steam on Wheels Bemba Translation API")
 
-MODEL_ID = "Wana1708/nllb-bemba-education"
+MODEL_ID = "facebook/nllb-200-distilled-600M"
 SRC_LANG = "eng_Latn"
 TGT_LANG = "bem_Latn"
 
@@ -175,6 +175,21 @@ def lesson_page():
 @app.get("/upload")
 def upload_page():
     return FileResponse(os.path.join(STATIC_DIR, "upload.html"))
+
+
+@app.get("/lessons")
+def lessons_page():
+    return FileResponse(os.path.join(STATIC_DIR, "lessons.html"))
+
+
+@app.get("/progress")
+def progress_page():
+    return FileResponse(os.path.join(STATIC_DIR, "progress.html"))
+
+
+@app.get("/profile")
+def profile_page():
+    return FileResponse(os.path.join(STATIC_DIR, "profile.html"))
 
 
 # ---------------------------------------------------------------------------
