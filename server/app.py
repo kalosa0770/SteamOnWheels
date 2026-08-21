@@ -244,8 +244,8 @@ def get_lesson(subject: str):
             "subject": subject,
             "topic_en": f"{subject} — No lessons uploaded yet",
             "topic_bem": f"{subject} — Tapali amasambililo",
-            "content_en": "No lesson content has been uploaded for this subject yet. Use the Upload screen to add one.",
-            "content_bem": "Tapali amasambililo ayabikwapo pali ino misango. Bomfyeni Upload pa kubika limo.",
+            "content_en": "No lesson content has been uploaded for this subject yet.",
+            "content_bem": "Tapali amasambililo ayabikwapo pali ino misango.",
         }
 
     return {
