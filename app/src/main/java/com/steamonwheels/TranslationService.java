@@ -8,8 +8,8 @@ import java.util.concurrent.TimeUnit;
 
 public class TranslationService {
 
-    // Live Production Railway API URL
-    private static final String API_URL = "https://steamonwheels-production.up.railway.app/translate";
+    private static final String TRANSLATE_URL = "https://steamonwheels-production.up.railway.app/translate";
+    private static final String TTS_URL = "https://steamonwheels-production.up.railway.app/api/tts";
 
     private final OkHttpClient client = new OkHttpClient.Builder()
             .connectTimeout(60, TimeUnit.SECONDS)
@@ -18,6 +18,11 @@ public class TranslationService {
 
     public interface TranslationCallback {
         void onSuccess(String translatedBembaText);
+        void onError(String errorMessage);
+    }
+
+    public interface AudioCallback {
+        void onSuccess(byte[] audioBytes);
         void onError(String errorMessage);
     }
 
@@ -34,7 +39,7 @@ public class TranslationService {
             );
 
             Request request = new Request.Builder()
-                    .url(API_URL)
+                    .url(TRANSLATE_URL)
                     .post(body)
                     .build();
 
@@ -62,6 +67,44 @@ public class TranslationService {
                         }
                     } else {
                         callback.onError("API Error: HTTP " + response.code());
+                    }
+                }
+            });
+        } catch (Exception e) {
+            callback.onError("Request error: " + e.getMessage());
+        }
+    }
+
+    // New TTS Audio API Method
+    public void fetchAudio(String text, String langCode, AudioCallback callback) {
+        try {
+            JSONObject json = new JSONObject();
+            json.put("text", text);
+            json.put("lang", langCode); // "bem" or "eng"
+
+            RequestBody body = RequestBody.create(
+                    json.toString(),
+                    MediaType.get("application/json; charset=utf-8")
+            );
+
+            Request request = new Request.Builder()
+                    .url(TTS_URL)
+                    .post(body)
+                    .build();
+
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    callback.onError("Network error: " + e.getMessage());
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    if (response.isSuccessful() && response.body() != null) {
+                        byte[] audioBytes = response.body().bytes();
+                        callback.onSuccess(audioBytes);
+                    } else {
+                        callback.onError("TTS API Error: HTTP " + response.code());
                     }
                 }
             });

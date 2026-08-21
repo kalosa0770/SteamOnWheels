@@ -1,20 +1,24 @@
 package com.steamonwheels;
 
 import android.graphics.Color;
+import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.Executors;
 
 public class LessonActivity extends AppCompatActivity {
 
     private boolean isBemba = true;
-    private TextToSpeech textToSpeech;
+    private MediaPlayer mediaPlayer;
+    private TranslationService translationService;
 
     private TextView tvLessonSubject, tvLessonTopic, tvLessonBody;
     private TextView tvLessonLangEng, tvLessonLangBem, btnBack;
@@ -31,6 +35,8 @@ public class LessonActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lesson);
 
+        translationService = new TranslationService();
+
         String passedSubject = getIntent().getStringExtra("SUBJECT_NAME");
         if (passedSubject != null && !passedSubject.isEmpty()) {
             currentSubject = passedSubject;
@@ -44,21 +50,14 @@ public class LessonActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btnBack);
         btnListenAudio = findViewById(R.id.btnListenAudio);
 
-        textToSpeech = new TextToSpeech(this, status -> {
-            if (status == TextToSpeech.SUCCESS) {
-                textToSpeech.setLanguage(Locale.US);
-            }
-        });
-
         btnBack.setOnClickListener(v -> finish());
         findViewById(R.id.btnLessonLangToggle).setOnClickListener(v -> {
             isBemba = !isBemba;
             updateLessonDisplay();
         });
 
-        btnListenAudio.setOnClickListener(v -> playAudio());
+        btnListenAudio.setOnClickListener(v -> playAudioFromRailway());
 
-        // Fetch latest saved lesson for this subject from SQLite/Room DB
         loadLessonFromDatabase();
     }
 
@@ -97,17 +96,65 @@ public class LessonActivity extends AppCompatActivity {
         }
     }
 
-    private void playAudio() {
+    private void playAudioFromRailway() {
         String speechText = tvLessonBody.getText().toString();
-        Toast.makeText(this, "Playing Audio...", Toast.LENGTH_SHORT).show();
-        textToSpeech.speak(speechText, TextToSpeech.QUEUE_FLUSH, null, "LessonTTS");
+        String langCode = isBemba ? "bem" : "eng";
+
+        btnListenAudio.setEnabled(false);
+        Toast.makeText(this, "Generating speech from server...", Toast.LENGTH_SHORT).show();
+
+        translationService.fetchAudio(speechText, langCode, new TranslationService.AudioCallback() {
+            @Override
+            public void onSuccess(byte[] audioBytes) {
+                runOnUiThread(() -> {
+                    btnListenAudio.setEnabled(true);
+                    playWavBytes(audioBytes);
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                runOnUiThread(() -> {
+                    btnListenAudio.setEnabled(true);
+                    Toast.makeText(LessonActivity.this, "Audio Error: " + errorMessage, Toast.LENGTH_LONG).show();
+                });
+            }
+        });
+    }
+
+    private void playWavBytes(byte[] audioBytes) {
+        try {
+            if (mediaPlayer != null) {
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.stop();
+                }
+                mediaPlayer.release();
+            }
+
+            File tempAudio = File.createTempFile("tts_audio", ".wav", getCacheDir());
+            FileOutputStream fos = new FileOutputStream(tempAudio);
+            fos.write(audioBytes);
+            fos.close();
+
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.setDataSource(tempAudio.getAbsolutePath());
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+
+            mediaPlayer.setOnCompletionListener(mp -> tempAudio.delete());
+        } catch (IOException e) {
+            Toast.makeText(this, "Playback failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
     protected void onDestroy() {
-        if (textToSpeech != null) {
-            textToSpeech.stop();
-            textToSpeech.shutdown();
+        if (mediaPlayer != null) {
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.stop();
+            }
+            mediaPlayer.release();
+            mediaPlayer = null;
         }
         super.onDestroy();
     }

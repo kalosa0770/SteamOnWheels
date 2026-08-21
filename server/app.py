@@ -1,6 +1,7 @@
 import io
 import os
 import sqlite3
+import threading
 from contextlib import contextmanager
 from datetime import datetime, timezone
 
@@ -13,17 +14,16 @@ from pydantic import BaseModel
 from scipy.io.wavfile import write as write_wav
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, VitsModel, AutoTokenizer as AutoTokenizerTTS
 
+# Limit CPU threads to optimize memory and prevent OOM on host platforms
+torch.set_num_threads(2)
+
 app = FastAPI(title="Steam on Wheels Bemba Translation API")
 
 MODEL_ID = "facebook/nllb-200-distilled-600M"
 SRC_LANG = "eng_Latn"
 TGT_LANG = "bem_Latn"
 
-# Meta MMS text-to-speech models — one VITS model per language.
-# "bem" = Bemba, "eng" = English. If facebook/mms-tts-bem turns out to be
-# unavailable or low quality for your dialect, swap this for a fine-tuned
-# alternative (e.g. one trained on the BembaSpeech corpus) — the rest of
-# this code doesn't need to change, only the model id.
+# Meta MMS text-to-speech models
 TTS_MODEL_IDS = {
     "bem": "facebook/mms-tts-bem",
     "eng": "facebook/mms-tts-eng",
@@ -34,8 +34,9 @@ DB_PATH = os.path.join(os.path.dirname(__file__), "lessons.db")
 tokenizer = None
 model = None
 
-# Cache of loaded TTS models, keyed by language code
+# Cache of loaded TTS models and lock for thread safety
 _tts_cache = {}
+_tts_lock = threading.Lock()
 
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -47,7 +48,8 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 @contextmanager
 def get_db():
-    conn = sqlite3.connect(DB_PATH)
+    # check_same_thread=False allows SQLite connections across FastAPI background threads
+    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     try:
         yield conn
@@ -112,14 +114,15 @@ def get_tts_model(lang: str):
     if lang not in TTS_MODEL_IDS:
         raise HTTPException(status_code=400, detail=f"Unsupported TTS language: {lang}")
 
-    if lang not in _tts_cache:
-        model_id = TTS_MODEL_IDS[lang]
-        print(f"Loading MMS-TTS model for '{lang}' ({model_id})...")
-        tts_tokenizer = AutoTokenizerTTS.from_pretrained(model_id)
-        tts_model = VitsModel.from_pretrained(model_id)
-        tts_model.eval()
-        _tts_cache[lang] = (tts_tokenizer, tts_model)
-        print(f"MMS-TTS model for '{lang}' loaded.")
+    with _tts_lock:
+        if lang not in _tts_cache:
+            model_id = TTS_MODEL_IDS[lang]
+            print(f"Loading MMS-TTS model for '{lang}' ({model_id})...")
+            tts_tokenizer = AutoTokenizerTTS.from_pretrained(model_id)
+            tts_model = VitsModel.from_pretrained(model_id)
+            tts_model.eval()
+            _tts_cache[lang] = (tts_tokenizer, tts_model)
+            print(f"MMS-TTS model for '{lang}' loaded.")
 
     return _tts_cache[lang]
 
@@ -140,6 +143,10 @@ def synthesize_speech(text: str, lang: str) -> bytes:
     buffer.seek(0)
     return buffer.read()
 
+
+# ---------------------------------------------------------------------------
+# Request Schemas
+# ---------------------------------------------------------------------------
 
 class TranslationRequest(BaseModel):
     inputs: str
@@ -233,7 +240,6 @@ def get_lesson(subject: str):
         ).fetchone()
 
     if row is None:
-        # Fallback content so the lesson screen always has something to show
         return {
             "subject": subject,
             "topic_en": f"{subject} — No lessons uploaded yet",
