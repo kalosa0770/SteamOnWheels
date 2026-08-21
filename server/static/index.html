@@ -37,8 +37,7 @@
           </div>
         </div>
 
-        <h1 id="greeting" class="font-display font-extrabold text-[26px] md:text-4xl mt-6 md:mt-8 leading-snug whitespace-pre-line">Mwabweleni,
-ba Micheal</h1>
+        <h1 id="greeting" class="font-display font-extrabold text-[26px] md:text-4xl mt-6 md:mt-8 leading-snug whitespace-pre-line">Mwabweleni,</h1>
         <p id="greetingSub" class="text-navy/50 text-sm mt-2"></p>
 
         <div class="bg-orange rounded-[28px] mt-6 md:mt-8 p-5 md:p-8">
@@ -61,8 +60,10 @@ ba Micheal</h1>
     <a href="/progress" class="nav-item"><svg viewBox="0 0 24 24" fill="none"><path d="M5 20V12M12 20V6M19 20V15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Progress</span></a>
     <a href="/profile" class="nav-item"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="2"/><path d="M4.5 20C5.5 16 8.5 14 12 14C15.5 14 18.5 16 19.5 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Profile</span></a>
   </nav>
+  <script src="/static/auth.js"></script>
   <script>
     let isBemba = true;
+    let pupilFirstName = '';
     const greeting = document.getElementById('greeting');
     const greetingSub = document.getElementById('greetingSub');
     const subjectsTitle = document.getElementById('subjectsTitle');
@@ -72,13 +73,13 @@ ba Micheal</h1>
 
     function updateLanguage() {
       if (isBemba) {
-        greeting.textContent = 'Mwabweleni,\nba Micheal';
+        greeting.textContent = `Mwabweleni,\nba ${pupilFirstName}`;
         greetingSub.textContent = 'Uyu musango wa lesson wingamusanga pano';
         subjectsTitle.textContent = 'Subjects';
         allLessonsLink.innerHTML = 'Amasambililo yonse&nbsp; →';
         langBem.classList.add('active'); langEng.classList.remove('active');
       } else {
-        greeting.textContent = 'Welcome back,\nMicheal';
+        greeting.textContent = `Welcome back,\n${pupilFirstName}`;
         greetingSub.textContent = "Pick up where you left off, or start something new";
         subjectsTitle.textContent = 'Subjects';
         allLessonsLink.innerHTML = 'All lessons&nbsp; →';
@@ -91,7 +92,13 @@ ba Micheal</h1>
         window.location.href = `/lesson?subject=${encodeURIComponent(btn.dataset.subject)}`;
       });
     });
-    updateLanguage();
+
+    (async () => {
+      const user = await requireAuth('pupil');
+      if (!user) return;
+      pupilFirstName = (user.name || '').trim().split(/\s+/)[0] || '';
+      updateLanguage();
+    })();
   </script>
 </body>
 </html>

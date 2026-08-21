@@ -11,14 +11,14 @@
 </head>
 <body class="bg-bg text-navy min-h-screen flex justify-center">
   <div class="w-full max-w-md md:max-w-lg px-5 pt-8 pb-16">
-    <button onclick="location.href='/'" class="flex items-center gap-1 font-display font-bold text-[15px] border-0 bg-transparent cursor-pointer"><svg viewBox="0 0 24 24" fill="none" class="w-4 h-4"><path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Back</button>
+    <button onclick="location.href='/teacher/dashboard'" class="flex items-center gap-1 font-display font-bold text-[15px] border-0 bg-transparent cursor-pointer"><svg viewBox="0 0 24 24" fill="none" class="w-4 h-4"><path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Back to dashboard</button>
 
     <div class="mt-6">
       <div class="flex items-center gap-2 text-orange-dark text-[11px] font-bold tracking-widest uppercase">
         <span class="w-2 h-2 rounded-full bg-orange"></span>Teacher access
       </div>
       <h1 class="font-display font-extrabold text-2xl mt-2">Upload educational content</h1>
-      <p class="text-navy/55 text-sm mt-2 leading-relaxed">Enter English content below — the AI model will translate it to Bemba automatically before saving. Students won't see this screen; it's only reachable from the STEAM logo.</p>
+      <p class="text-navy/55 text-sm mt-2 leading-relaxed">Enter English content below — the AI model will translate it to Bemba automatically before saving. Only pupils and teachers with an account can see the finished lesson.</p>
     </div>
 
     <div class="mt-6">
@@ -44,6 +44,7 @@
     </div>
   </div>
 
+  <script src="/static/auth.js"></script>
   <script>
     const etSubject = document.getElementById('etSubject');
     const etTopicEnglish = document.getElementById('etTopicEnglish');
@@ -60,7 +61,7 @@
       statusText.textContent = 'Translating topic and content to Bemba…';
       btnUploadTranslate.disabled = true;
       try {
-        const res = await fetch('/api/lessons', {
+        const res = await authFetch('/api/lessons', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ subject, topic_en: topicEn, content_en: contentEn }),
         });
@@ -77,6 +78,10 @@
         btnUploadTranslate.disabled = false;
       }
     });
+
+    (async () => {
+      await requireAuth('teacher');
+    })();
   </script>
 </body>
 </html>

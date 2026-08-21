@@ -63,6 +63,7 @@
     </div>
   </div>
   
+  <script src="/static/auth.js"></script>
   <script>
     let isBemba = true;
     let lessonData = null;
@@ -98,7 +99,7 @@
 
     async function loadLesson() {
       try {
-        const res = await fetch(`/api/lessons/${encodeURIComponent(subject)}`);
+        const res = await authFetch(`/api/lessons/${encodeURIComponent(subject)}`);
         lessonData = await res.json();
       } catch (err) {
         lessonData = {
@@ -120,7 +121,7 @@
       audioLabel.textContent = 'Loading audio…';
       btnListenAudio.disabled = true;
       try {
-        const res = await fetch('/api/tts', {
+        const res = await authFetch('/api/tts', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text, lang: isBemba ? 'bem' : 'eng' }),
         });
@@ -146,7 +147,11 @@
     }
     btnListenAudio.addEventListener('click', playAudio);
 
-    loadLesson();
+    (async () => {
+      const user = await requireAuth();
+      if (!user) return;
+      loadLesson();
+    })();
   </script>
 </body>
 </html>

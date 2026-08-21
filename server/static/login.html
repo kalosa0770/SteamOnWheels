@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Log in — Steam on Wheels</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+  <link href="/static/output.css?v=2" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-bg text-navy min-h-screen flex justify-center">
+  <div class="w-full max-w-md md:max-w-lg px-5 pt-8 pb-16">
+    <div class="flex items-center gap-2 px-2 mb-2">
+      <img src="/static/favicon.svg" class="w-10 h-10" />
+      <span class="font-display font-extrabold text-base leading-tight text-navy">STEAM<br><span class="text-[9px] tracking-widest text-orange-dark uppercase font-semibold" style="font-family:'Inter',sans-serif">on wheels</span></span>
+    </div>
+
+    <div class="mt-6">
+      <h1 class="font-display font-extrabold text-2xl mt-2">Welcome back</h1>
+      <p class="text-navy/55 text-sm mt-2 leading-relaxed">Log in to continue your lessons, or to reach your teacher dashboard.</p>
+    </div>
+
+    <form id="loginForm">
+      <div class="mt-6">
+        <label class="block text-xs font-bold text-navy mb-1.5" for="email">Email</label>
+        <input class="w-full px-4 py-3 rounded-xl border border-black/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-orange" id="email" type="email" placeholder="you@example.com" required />
+      </div>
+
+      <div class="mt-4">
+        <label class="block text-xs font-bold text-navy mb-1.5" for="password">Password</label>
+        <input class="w-full px-4 py-3 rounded-xl border border-black/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-orange" id="password" type="password" placeholder="••••••••" required />
+      </div>
+
+      <button id="btnLogin" type="submit" class="w-full h-14 bg-orange hover:bg-orange-dark text-white rounded-full font-display font-bold mt-6 border-0 cursor-pointer disabled:opacity-60">Log in</button>
+
+      <div id="successText" class="mt-4 text-sm text-green-700 hidden">Account created — log in below to continue.</div>
+      <div id="errorText" class="mt-4 text-sm text-red-600 hidden"></div>
+    </form>
+
+    <p class="text-center text-navy/55 text-sm mt-6">
+      Don't have an account?
+      <a href="/signup" class="text-orange-dark font-semibold">Sign up</a>
+    </p>
+  </div>
+
+  <script src="/static/auth.js"></script>
+  <script>
+    // If already logged in, skip straight past the login screen.
+    (async () => {
+      if (getToken()) {
+        const user = await requireAuth();
+        if (user) window.location.href = homeUrlForRole(user.role);
+      }
+    })();
+
+    const form = document.getElementById('loginForm');
+    const btnLogin = document.getElementById('btnLogin');
+    const errorText = document.getElementById('errorText');
+    const successText = document.getElementById('successText');
+
+    // Prefill the email and show a confirmation when arriving fresh from signup.
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('signedUp') === '1') {
+      successText.classList.remove('hidden');
+      const prefillEmail = params.get('email');
+      if (prefillEmail) document.getElementById('email').value = prefillEmail;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorText.classList.add('hidden');
+      btnLogin.disabled = true;
+      btnLogin.textContent = 'Logging in…';
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: document.getElementById('email').value.trim(),
+            password: document.getElementById('password').value,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Login failed');
+
+        saveSession(data.token, data.user);
+        window.location.href = homeUrlForRole(data.user.role);
+      } catch (err) {
+        errorText.textContent = err.message;
+        errorText.classList.remove('hidden');
+      } finally {
+        btnLogin.disabled = false;
+        btnLogin.textContent = 'Log in';
+      }
+    });
+  </script>
+</body>
+</html>

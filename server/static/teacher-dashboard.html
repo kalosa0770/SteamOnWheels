@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teacher Dashboard — Steam on Wheels</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+  <link href="/static/output.css?v=2" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-bg text-navy">
+  <div class="min-h-screen flex">
+    <aside class="hidden md:flex md:flex-col md:w-64 md:shrink-0 bg-navy-deep text-white px-4 py-6 gap-1">
+      <div class="flex items-center gap-2 px-2 mb-6">
+        <img src="/static/favicon.svg" class="w-10 h-10" />
+        <span class="font-display font-extrabold text-base leading-tight">STEAM<br><span class="text-[9px] tracking-widest text-orange uppercase font-semibold" style="font-family:'Inter',sans-serif">on wheels</span></span>
+      </div>
+      <nav class="flex flex-col gap-1">
+        <a href="/teacher/dashboard" class="sidebar-item active"><svg viewBox="0 0 24 24" fill="none"><path d="M4 11L12 4L20 11V19C20 19.55 19.55 20 19 20H15V14H9V20H5C4.45 20 4 19.55 4 19V11Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>Dashboard</a>
+        <a href="/upload" class="sidebar-item"><svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4M12 4L7 9M12 4L17 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16V18.5C4 19.3 4.7 20 5.5 20H18.5C19.3 20 20 19.3 20 18.5V16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Upload lesson</a>
+      </nav>
+      <div class="mt-auto pt-4 border-t border-white/10">
+        <button id="btnLogoutSidebar" class="sidebar-item w-full text-left border-0 bg-transparent cursor-pointer"><svg viewBox="0 0 24 24" fill="none"><path d="M9 8V6.5C9 5.12 10.12 4 11.5 4H17.5C18.88 4 20 5.12 20 6.5V17.5C20 18.88 18.88 20 17.5 20H11.5C10.12 20 9 18.88 9 17.5V16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M13 12H4M4 12L7.5 8.5M4 12L7.5 15.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Log out</button>
+      </div>
+    </aside>
+    <div class="flex-1 flex justify-center">
+      <div class="w-full max-w-md md:max-w-3xl px-5 md:px-10 pt-8 md:pt-10 pb-28 md:pb-10">
+        <div class="flex items-center justify-between md:justify-end">
+          <button onclick="logout()" class="md:hidden flex items-center gap-2 border-0 bg-transparent cursor-pointer text-sm font-semibold text-navy/60">Log out</button>
+          <span class="hidden md:inline text-xs font-bold text-navy/40 tracking-widest uppercase">Teacher dashboard</span>
+        </div>
+
+        <h1 id="greeting" class="font-display font-extrabold text-[26px] md:text-4xl mt-6 md:mt-8 leading-snug">Welcome back</h1>
+        <p class="text-navy/50 text-sm mt-2">Here's what you've posted for your class so far.</p>
+
+        <div class="bg-orange rounded-[28px] mt-6 md:mt-8 p-5 md:p-8">
+          <div class="flex items-center justify-between">
+            <h2 class="font-display font-bold text-white/90 text-xs tracking-widest uppercase">Your lessons</h2>
+            <button onclick="location.href='/upload'" class="text-white font-semibold text-sm border-0 bg-transparent cursor-pointer flex items-center gap-1">+ New lesson</button>
+          </div>
+          <div id="lessonsList" class="grid gap-4 mt-5"></div>
+          <p id="emptyState" class="text-white/85 text-sm mt-2 hidden">You haven't posted any lessons yet. Use the "New lesson" button above to add your first one.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <nav class="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-md h-16 bg-navy-deep rounded-full flex items-center px-2 shadow-xl z-40">
+    <a href="/teacher/dashboard" class="nav-item active"><svg viewBox="0 0 24 24" fill="none"><path d="M4 11L12 4L20 11V19C20 19.55 19.55 20 19 20H15V14H9V20H5C4.45 20 4 19.55 4 19V11Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Dashboard</span></a>
+    <a href="/upload" class="nav-item"><svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4M12 4L7 9M12 4L17 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16V18.5C4 19.3 4.7 20 5.5 20H18.5C19.3 20 20 19.3 20 18.5V16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Upload</span></a>
+  </nav>
+
+  <script src="/static/auth.js"></script>
+  <script>
+    const greeting = document.getElementById('greeting');
+    const lessonsList = document.getElementById('lessonsList');
+    const emptyState = document.getElementById('emptyState');
+
+    function firstName(fullName) {
+      return (fullName || '').trim().split(/\s+/)[0] || '';
+    }
+
+    function formatDate(iso) {
+      try {
+        return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+      } catch (e) {
+        return '';
+      }
+    }
+
+    async function loadLessons() {
+      try {
+        const res = await authFetch('/api/teacher/lessons');
+        const lessons = await res.json();
+
+        lessonsList.innerHTML = '';
+        if (lessons.length === 0) {
+          emptyState.classList.remove('hidden');
+          return;
+        }
+        emptyState.classList.add('hidden');
+
+        lessons.forEach((lesson) => {
+          const card = document.createElement('div');
+          card.className = 'bg-white rounded-2xl p-4 flex items-center justify-between gap-3';
+          card.innerHTML = `
+            <div class="min-w-0">
+              <div class="font-display font-bold text-navy text-sm tracking-wide uppercase">${lesson.subject}</div>
+              <div class="text-navy/60 text-sm truncate mt-0.5">${lesson.topic_en}</div>
+              <div class="text-navy/40 text-xs mt-1">Posted ${formatDate(lesson.created_at)}</div>
+            </div>
+            <button data-subject="${lesson.subject}" class="shrink-0 flex items-center gap-1.5 text-orange-dark font-semibold text-sm border-0 bg-transparent cursor-pointer">
+              <span>Preview</span><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          `;
+          lessonsList.appendChild(card);
+        });
+
+        lessonsList.querySelectorAll('button[data-subject]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            window.location.href = `/lesson?subject=${encodeURIComponent(btn.dataset.subject)}`;
+          });
+        });
+      } catch (e) {
+        // authFetch already redirects to /login on auth failure
+      }
+    }
+
+    document.getElementById('btnLogoutSidebar').addEventListener('click', logout);
+
+    (async () => {
+      const user = await requireAuth('teacher');
+      if (!user) return;
+      greeting.textContent = `Welcome back, ${firstName(user.name)}`;
+      loadLessons();
+    })();
+  </script>
+</body>
+</html>

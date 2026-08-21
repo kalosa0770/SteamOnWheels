@@ -63,6 +63,7 @@
     <a href="/progress" class="nav-item active"><svg viewBox="0 0 24 24" fill="none"><path d="M5 20V12M12 20V6M19 20V15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Progress</span></a>
     <a href="/profile" class="nav-item"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="2"/><path d="M4.5 20C5.5 16 8.5 14 12 14C15.5 14 18.5 16 19.5 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Profile</span></a>
   </nav>
+  <script src="/static/auth.js"></script>
   <script>
     // PLACEHOLDER DATA — no real progress-tracking backend exists yet.
     // Replace this with a fetch('/api/progress') once that endpoint exists.
@@ -111,7 +112,12 @@
       render();
     }
     document.getElementById('langToggle').addEventListener('click', () => { isBemba = !isBemba; updateLanguage(); });
-    updateLanguage();
+
+    (async () => {
+      const user = await requireAuth('pupil');
+      if (!user) return;
+      updateLanguage();
+    })();
   </script>
 </body>
 </html>

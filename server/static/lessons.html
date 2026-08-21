@@ -63,6 +63,7 @@
     <a href="/progress" class="nav-item"><svg viewBox="0 0 24 24" fill="none"><path d="M5 20V12M12 20V6M19 20V15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Progress</span></a>
     <a href="/profile" class="nav-item"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="2"/><path d="M4.5 20C5.5 16 8.5 14 12 14C15.5 14 18.5 16 19.5 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Profile</span></a>
   </nav>
+  <script src="/static/auth.js"></script>
   <script>
     const SUBJECTS = ['Maths', 'Literacy', 'Science', 'CTS'];
     let isBemba = true;
@@ -77,7 +78,7 @@
       for (const subject of SUBJECTS) {
         let data;
         try {
-          const res = await fetch(`/api/lessons/${encodeURIComponent(subject)}`);
+          const res = await authFetch(`/api/lessons/${encodeURIComponent(subject)}`);
           data = await res.json();
         } catch (e) { continue; }
 
@@ -106,7 +107,12 @@
       loadLessons();
     }
     document.getElementById('langToggle').addEventListener('click', () => { isBemba = !isBemba; updateLanguage(); });
-    updateLanguage();
+
+    (async () => {
+      const user = await requireAuth();
+      if (!user) return;
+      updateLanguage();
+    })();
   </script>
 </body>
 </html>

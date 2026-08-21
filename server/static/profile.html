@@ -49,8 +49,9 @@
             </div>
           </div>
           <div class="flex flex-col items-center mt-8 md:mt-10">
-            <div class="w-20 h-20 rounded-full bg-white flex items-center justify-center font-display font-bold text-2xl text-navy">MS</div>
-            <div class="font-display font-extrabold text-white text-xl mt-4">Micheal Sichuna</div>
+            <div id="avatarInitials" class="w-20 h-20 rounded-full bg-white flex items-center justify-center font-display font-bold text-2xl text-navy"></div>
+            <div id="profileName" class="font-display font-extrabold text-white text-xl mt-4"></div>
+            <div id="profileEmail" class="text-white/70 text-xs mt-1"></div>
           </div>
         </div>
 
@@ -68,7 +69,7 @@
           <button class="settings-row" onclick="window.location.href='/lessons'">
             <span class="settings-row-label">Recorded Lessons</span><svg class="w-4 h-4 text-navy/40" viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
 
-          <button class="w-full h-14 bg-navy-deep text-white rounded-full font-display font-bold mt-2 border-0 cursor-pointer" onclick="if(confirm('Log out?')) window.location.href='/'">Log Out</button>
+          <button class="w-full h-14 bg-navy-deep text-white rounded-full font-display font-bold mt-2 border-0 cursor-pointer" onclick="if(confirm('Log out?')) logout()">Log Out</button>
         </div>
 
       </div>
@@ -80,8 +81,8 @@
     <a href="/progress" class="nav-item"><svg viewBox="0 0 24 24" fill="none"><path d="M5 20V12M12 20V6M19 20V15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Progress</span></a>
     <a href="/profile" class="nav-item active"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="2"/><path d="M4.5 20C5.5 16 8.5 14 12 14C15.5 14 18.5 16 19.5 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Profile</span></a>
   </nav>
+  <script src="/static/auth.js"></script>
   <script>
-    // NOTE: "Micheal Sichuna" / "MS" is hardcoded demo data — see comment above.
     let isBemba = true;
     const langEng = document.getElementById('langEng');
     const langBem = document.getElementById('langBem');
@@ -95,6 +96,23 @@
     function toggle() { isBemba = !isBemba; updateLanguage(); }
     document.getElementById('langToggle').addEventListener('click', toggle);
     document.getElementById('langToggleTop').addEventListener('click', toggle);
+
+    function initialsFor(name) {
+      return (name || '')
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map(part => part[0]?.toUpperCase() || '')
+        .join('');
+    }
+
+    (async () => {
+      const user = await requireAuth('pupil');
+      if (!user) return;
+      document.getElementById('avatarInitials').textContent = initialsFor(user.name);
+      document.getElementById('profileName').textContent = user.name;
+      document.getElementById('profileEmail').textContent = user.email;
+    })();
   </script>
 </body>
 </html>
