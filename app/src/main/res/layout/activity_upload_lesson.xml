@@ -2,74 +2,200 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    android:padding="20dp">
+    android:background="@color/bg">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="‹ Back to dashboard"
+            android:textStyle="bold"
+            android:textColor="@color/navy"
+            android:clickable="true"
+            android:focusable="true" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Upload Educational Content"
-            android:textColor="@color/brand_text_dark"
+            android:text="TEACHER ACCESS"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:textColor="@color/orange_dark"
+            android:letterSpacing="0.08"
+            android:layout_marginTop="16dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Upload educational content"
             android:textSize="22sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:textColor="@color/navy"
+            android:layout_marginTop="4dp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Enter English content. AI will auto-translate to Bemba."
-            android:textColor="@color/brand_text_muted"
-            android:textSize="13sp" />
+            android:text="Write your lesson in English, translate it, then review and fix the Bemba before saving."
+            android:textSize="13sp"
+            android:textColor="@color/text_muted"
+            android:layout_marginTop="6dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Subject"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@color/navy"
+            android:layout_marginTop="24dp" />
 
         <EditText
             android:id="@+id/etSubject"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="Subject (e.g., Science, Maths)" />
+            android:hint="e.g. Science, Maths"
+            android:background="@color/white"
+            android:padding="14dp"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Topic title (English)"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@color/navy"
+            android:layout_marginTop="16dp" />
 
         <EditText
             android:id="@+id/etTopicEnglish"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:hint="Topic Title in English" />
+            android:hint="e.g. Domestic and Wild Animals"
+            android:background="@color/white"
+            android:padding="14dp"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Lesson body (English)"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@color/navy"
+            android:layout_marginTop="16dp" />
 
         <EditText
             android:id="@+id/etContentEnglish"
             android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:layout_marginTop="12dp"
-            android:gravity="top|start"
-            android:hint="English Lesson Body / Sentences"
-            android:inputType="textMultiLine" />
-
-        <Button
-            android:id="@+id/btnUploadTranslate"
-            android:layout_width="match_parent"
-            android:layout_height="54dp"
-            android:layout_marginTop="20dp"
-            android:background="@drawable/bg_orange_card"
-            android:text="Auto-Translate and Save to DB"
-            android:textColor="@color/white"
-            android:textSize="15sp"
-            android:textStyle="bold" />
+            android:layout_height="wrap_content"
+            android:minLines="6"
+            android:gravity="top"
+            android:hint="Write the lesson content here…"
+            android:background="@color/white"
+            android:padding="14dp"
+            android:layout_marginTop="4dp" />
 
         <TextView
-            android:id="@+id/tvAutoTranslateStatus"
+            android:id="@+id/btnTranslate"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@drawable/bg_button_nav"
+            android:gravity="center"
+            android:text="Translate to Bemba"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:layout_marginTop="20dp"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <!-- Hidden until Translate succeeds, matching upload.html's bemFields toggle. -->
+        <LinearLayout
+            android:id="@+id/bemFields"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:background="@drawable/bg_lang_toggle"
-            android:padding="12dp"
-            android:text="AI Status: Waiting for input..."
-            android:textColor="@color/brand_text_dark"
-            android:textSize="14sp" />
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Topic title (Bemba) — edit if needed"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="@color/navy"
+                android:layout_marginTop="24dp" />
+
+            <EditText
+                android:id="@+id/etTopicBemba"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/white"
+                android:padding="14dp"
+                android:layout_marginTop="4dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Lesson body (Bemba) — edit if needed"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="@color/navy"
+                android:layout_marginTop="16dp" />
+
+            <EditText
+                android:id="@+id/etContentBemba"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minLines="6"
+                android:gravity="top"
+                android:background="@color/white"
+                android:padding="14dp"
+                android:layout_marginTop="4dp" />
+
+            <TextView
+                android:id="@+id/btnSave"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:background="@drawable/bg_button_orange"
+                android:gravity="center"
+                android:text="Save lesson"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:layout_marginTop="20dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="STATUS"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_muted_light"
+            android:letterSpacing="0.08"
+            android:layout_marginTop="20dp" />
+
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Waiting for input…"
+            android:textSize="13sp"
+            android:textColor="@color/text_body"
+            android:background="@color/white"
+            android:padding="14dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="24dp" />
 
     </LinearLayout>
 </ScrollView>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Welcome back"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/navy"
+            android:layout_marginTop="24dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Log in to continue your lessons, or to reach your teacher dashboard."
+            android:textSize="13sp"
+            android:textColor="@color/text_muted"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Email"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@color/navy"
+            android:layout_marginTop="24dp" />
+
+        <EditText
+            android:id="@+id/etEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textEmailAddress"
+            android:background="@color/white"
+            android:padding="14dp"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Password"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@color/navy"
+            android:layout_marginTop="16dp" />
+
+        <!-- inputType includes textVisiblePassword's opposite (textPassword);
+             Android's built-in show/hide toggle can be enabled by the app's
+             theme/EditText style — no separate icon button needed here the
+             way the web version required one. -->
+        <EditText
+            android:id="@+id/etPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword"
+            android:background="@color/white"
+            android:padding="14dp"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/btnLogin"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@drawable/bg_button_orange"
+            android:gravity="center"
+            android:text="Log in"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:layout_marginTop="24dp"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <TextView
+            android:id="@+id/tvError"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/error"
+            android:textSize="13sp"
+            android:layout_marginTop="12dp"
+            android:visibility="gone" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Don't have an account?"
+            android:textColor="@color/text_muted"
+            android:textSize="13sp"
+            android:layout_marginTop="24dp" />
+
+        <TextView
+            android:id="@+id/tvGoToSignup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Sign up"
+            android:textColor="@color/orange_dark"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp"
+            android:clickable="true"
+            android:focusable="true" />
+
+    </LinearLayout>
+</ScrollView>

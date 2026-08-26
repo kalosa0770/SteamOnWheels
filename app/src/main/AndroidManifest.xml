@@ -6,11 +6,16 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@android:drawable/sym_def_app_icon"
+        android:icon="@drawable/ic_launcher"
         android:label="Steam on Wheels"
         android:usesCleartextTraffic="true"
-        android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar">
+        android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
 
+        <!-- Launcher stays MainActivity — it already checks
+             SessionManager.isLoggedIn() in onCreate() and redirects to
+             LoginActivity (or TeacherDashboardActivity for teachers), so
+             it works as the entry-point gatekeeper without needing to
+             change the launcher itself. -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -26,6 +31,41 @@
 
         <activity
             android:name=".UploadLessonActivity"
+            android:exported="false" />
+
+        <!-- Pre-auth -->
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".SignupActivity"
+            android:exported="false" />
+
+        <!-- Pupil -->
+        <activity
+            android:name=".AllLessonsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".SubjectLessonsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ProgressActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ProfileActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".AccountSettingsActivity"
+            android:exported="false" />
+
+        <!-- Teacher -->
+        <activity
+            android:name=".TeacherDashboardActivity"
             android:exported="false" />
 
     </application>

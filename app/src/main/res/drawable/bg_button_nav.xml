@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/brand_dark_blue" />
-    <corners android:radius="24dp" />
-</shape>
+<!-- Generic navy ("nav" = navy, not navigation) pill button, for solid
+     navy CTAs — Log Out, Change password, etc. Darkens slightly on press. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#052A32" />
+            <corners android:radius="999dp" />
+        </shape>
+    </item>
+
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#073540" />
+            <corners android:radius="999dp" />
+        </shape>
+    </item>
+
+</selector>

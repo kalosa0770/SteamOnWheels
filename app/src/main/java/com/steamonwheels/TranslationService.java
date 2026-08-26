@@ -8,8 +8,8 @@ import java.util.concurrent.TimeUnit;
 
 public class TranslationService {
 
-    private static final String TRANSLATE_URL = "https://steamonwheels-production.up.railway.app/translate";
-    private static final String TTS_URL = "https://steamonwheels-production.up.railway.app/api/tts";
+    private static final String TRANSLATE_URL = ApiConfig.BASE_URL + "/translate";
+    private static final String TTS_URL = ApiConfig.BASE_URL + "/api/tts";
 
     private final OkHttpClient client = new OkHttpClient.Builder()
             .connectTimeout(60, TimeUnit.SECONDS)
@@ -26,6 +26,11 @@ public class TranslationService {
         void onError(String errorMessage);
     }
 
+    // NOTE: /translate itself doesn't require login. It's mostly superseded
+    // now anyway — POST /api/lessons (see LessonService.createLesson) has the
+    // server translate AND save a lesson in one call, so teachers uploading
+    // content no longer need to call this directly. Left in place in case
+    // any other screen still wants a one-off translation.
     public void translateToBemba(String englishText, TranslationCallback callback) {
         try {
             JSONObject json = new JSONObject();
@@ -75,8 +80,15 @@ public class TranslationService {
         }
     }
 
-    // New TTS Audio API Method
-    public void fetchAudio(String text, String langCode, AudioCallback callback) {
+    /**
+     * Fetches TTS audio for the given text. POST /api/tts now requires a
+     * logged-in user (pupil or teacher), so this needs the caller's auth
+     * token — get it from SessionManager.getToken(). If the token is
+     * missing/expired the server returns 401, which surfaces here as an
+     * "API Error: HTTP 401" through onError; the caller should treat that
+     * as "session expired, send the user back to login."
+     */
+    public void fetchAudio(String token, String text, String langCode, AudioCallback callback) {
         try {
             JSONObject json = new JSONObject();
             json.put("text", text);
@@ -90,6 +102,7 @@ public class TranslationService {
             Request request = new Request.Builder()
                     .url(TTS_URL)
                     .post(body)
+                    .header("Authorization", "Bearer " + token)
                     .build();
 
             client.newCall(request).enqueue(new Callback() {

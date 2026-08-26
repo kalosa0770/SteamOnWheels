@@ -18,7 +18,7 @@
         <span class="w-2 h-2 rounded-full bg-orange"></span>Teacher access
       </div>
       <h1 class="font-display font-extrabold text-2xl mt-2">Upload educational content</h1>
-      <p class="text-navy/55 text-sm mt-2 leading-relaxed">Enter English content below — the AI model will translate it to Bemba automatically before saving. Only pupils and teachers with an account can see the finished lesson.</p>
+      <p class="text-navy/55 text-sm mt-2 leading-relaxed">Write your lesson in English, translate it, then review and fix the Bemba before saving — the AI gets close, but a native check makes it read naturally.</p>
     </div>
 
     <div class="mt-6">
@@ -36,10 +36,24 @@
       <textarea class="w-full px-4 py-3 rounded-xl border border-black/10 bg-white text-sm min-h-32 focus:outline-none focus:ring-2 focus:ring-orange" id="etContentEnglish" placeholder="Write the lesson content here…"></textarea>
     </div>
 
-    <button id="btnUploadTranslate" class="w-full h-14 bg-orange hover:bg-orange-dark text-white rounded-full font-display font-bold mt-6 border-0 cursor-pointer disabled:opacity-60">Auto-translate &amp; save</button>
+    <button id="btnTranslate" class="w-full h-14 bg-navy-deep text-white rounded-full font-display font-bold mt-6 border-0 cursor-pointer disabled:opacity-60">Translate to Bemba</button>
+
+    <div id="bemFields" class="hidden">
+      <div class="mt-6">
+        <label class="block text-xs font-bold text-navy mb-1.5" for="etTopicBemba">Topic title (Bemba) — edit if needed</label>
+        <input class="w-full px-4 py-3 rounded-xl border border-black/10 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-orange" id="etTopicBemba" />
+      </div>
+
+      <div class="mt-4">
+        <label class="block text-xs font-bold text-navy mb-1.5" for="etContentBemba">Lesson body (Bemba) — edit if needed</label>
+        <textarea class="w-full px-4 py-3 rounded-xl border border-black/10 bg-white text-sm min-h-32 focus:outline-none focus:ring-2 focus:ring-orange" id="etContentBemba"></textarea>
+      </div>
+
+      <button id="btnSave" class="w-full h-14 bg-orange hover:bg-orange-dark text-white rounded-full font-display font-bold mt-6 border-0 cursor-pointer disabled:opacity-60">Save lesson</button>
+    </div>
 
     <div class="mt-5 p-4 rounded-xl border border-black/10 bg-white text-sm leading-relaxed whitespace-pre-line">
-      <span class="block text-[10px] font-bold text-navy/50 tracking-widest uppercase mb-1.5">AI status</span>
+      <span class="block text-[10px] font-bold text-navy/50 tracking-widest uppercase mb-1.5">Status</span>
       <span id="statusText">Waiting for input…</span>
     </div>
   </div>
@@ -49,33 +63,88 @@
     const etSubject = document.getElementById('etSubject');
     const etTopicEnglish = document.getElementById('etTopicEnglish');
     const etContentEnglish = document.getElementById('etContentEnglish');
-    const btnUploadTranslate = document.getElementById('btnUploadTranslate');
+    const btnTranslate = document.getElementById('btnTranslate');
+
+    const bemFields = document.getElementById('bemFields');
+    const etTopicBemba = document.getElementById('etTopicBemba');
+    const etContentBemba = document.getElementById('etContentBemba');
+    const btnSave = document.getElementById('btnSave');
+
     const statusText = document.getElementById('statusText');
 
-    btnUploadTranslate.addEventListener('click', async () => {
+    async function translateOne(text) {
+      const res = await authFetch('/translate', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inputs: text, src_lang: 'eng_Latn', tgt_lang: 'bem_Latn' }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || `Server error (${res.status})`);
+      }
+      const data = await res.json();
+      return data[0]?.translation_text || '';
+    }
+
+    btnTranslate.addEventListener('click', async () => {
       const subject = etSubject.value.trim();
       const topicEn = etTopicEnglish.value.trim();
       const contentEn = etContentEnglish.value.trim();
-      if (!subject || !topicEn || !contentEn) { alert('Please fill in all fields'); return; }
+      if (!subject || !topicEn || !contentEn) { alert('Please fill in subject, topic, and content first'); return; }
 
-      statusText.textContent = 'Translating topic and content to Bemba…';
-      btnUploadTranslate.disabled = true;
+      statusText.textContent = 'Translating…';
+      btnTranslate.disabled = true;
+      try {
+        const [topicBem, contentBem] = await Promise.all([
+          translateOne(topicEn),
+          translateOne(contentEn),
+        ]);
+        etTopicBemba.value = topicBem;
+        etContentBemba.value = contentBem;
+        bemFields.classList.remove('hidden');
+        statusText.textContent = 'Translated — review the Bemba below, edit anything that reads awkwardly, then save.';
+      } catch (err) {
+        statusText.textContent = `Error: ${err.message}`;
+      } finally {
+        btnTranslate.disabled = false;
+      }
+    });
+
+    btnSave.addEventListener('click', async () => {
+      const subject = etSubject.value.trim();
+      const topicEn = etTopicEnglish.value.trim();
+      const contentEn = etContentEnglish.value.trim();
+      const topicBem = etTopicBemba.value.trim();
+      const contentBem = etContentBemba.value.trim();
+
+      if (!topicBem || !contentBem) { alert('Bemba fields cannot be empty'); return; }
+
+      statusText.textContent = 'Saving…';
+      btnSave.disabled = true;
       try {
         const res = await authFetch('/api/lessons', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ subject, topic_en: topicEn, content_en: contentEn }),
+          body: JSON.stringify({
+            subject, topic_en: topicEn, content_en: contentEn,
+            topic_bem: topicBem, content_bem: contentBem,
+          }),
         });
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
           throw new Error(err.detail || `Server error (${res.status})`);
         }
-        const saved = await res.json();
-        statusText.textContent = `Saved!\n\nBemba topic: ${saved.topic_bem}\n\nBemba content:\n${saved.content_bem}`;
+        statusText.textContent = `Saved to ${subject}!`;
         alert(`Saved to ${subject}! Check the lesson screen.`);
+
+        // Reset for the next lesson
+        etTopicEnglish.value = '';
+        etContentEnglish.value = '';
+        etTopicBemba.value = '';
+        etContentBemba.value = '';
+        bemFields.classList.add('hidden');
       } catch (err) {
         statusText.textContent = `Error: ${err.message}`;
       } finally {
-        btnUploadTranslate.disabled = false;
+        btnSave.disabled = false;
       }
     });
 

@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/white" />
-    <corners android:radius="16dp" />
-</shape>
+<!-- White rounded tile, for the subject grid on Home (btnSubjectMaths etc.)
+     and item_subject_summary_card.xml. Larger radius than a plain lesson
+     row to read as a bigger, tappable tile. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#F1F1F1" />
+            <corners android:radius="20dp" />
+        </shape>
+    </item>
+
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#FFFFFF" />
+            <corners android:radius="20dp" />
+        </shape>
+    </item>
+
+</selector>

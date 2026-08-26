@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/brand_dark_blue" />
-    <corners android:radius="24dp" />
+<!-- Navy pill for the floating bottom nav bar (bottom_nav.xml). Not a
+     selector — the bar itself isn't clickable, only its child tabs are. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <solid android:color="#073540" />
+    <corners android:radius="32dp" />
+
 </shape>

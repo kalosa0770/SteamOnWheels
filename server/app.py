@@ -27,16 +27,18 @@ torch.set_num_threads(2)
 app = FastAPI(title="Steam on Wheels Bemba Translation API")
 
 # Using the "lite" distilled 600M checkpoint rather than the full 1.3B.
-# This app targets grade 1-5 pupils, so lesson content is short, simple
-# sentences - the gap in translation quality between 600M and 1.3B mostly
-# shows up on long/complex sentences, which isn't what this audience needs.
-# The 600M model is also ~2x lighter on RAM and meaningfully faster per
-# request, which matters more here than squeezing out marginal quality on
-# vocabulary these lessons won't use anyway. Most of the earlier translation
-# problems (repetition loops, mid-sentence truncation) were decoding bugs,
-# not a model-size issue - those fixes (beam search, no_repeat_ngram_size,
-# sentence-level splitting) apply here too and are what actually matters.
-MODEL_ID = "facebook/nllb-200-distilled-600M"
+# Upgraded back from the 600M "lite" model to nllb-200-distilled-1.3B.
+# In practice, teachers found 600M's Bemba output clunky/unnatural even
+# with the decoding fixes (beam search, no_repeat_ngram_size, sentence
+# splitting) - those fixes solve repetition/truncation bugs, but they
+# don't add vocabulary or grammatical nuance a smaller model doesn't have.
+# Bemba is a low-resource pair for NLLB, and low-resource pairs benefit
+# disproportionately from model size. This is a real RAM/latency cost
+# (roughly double 600M) - the teacher-editable Bemba review step (see
+# POST /api/lessons below) is the other half of addressing quality: even
+# a better model won't be perfect for Bemba, so teachers can hand-correct
+# phrasing per-lesson regardless of what the model produces.
+MODEL_ID = "facebook/nllb-200-distilled-1.3B"
 SRC_LANG = "eng_Latn"
 TGT_LANG = "bem_Latn"
 
@@ -336,6 +338,8 @@ class LessonCreateRequest(BaseModel):
     subject: str
     topic_en: str
     content_en: str
+    topic_bem: str
+    content_bem: str
 
 
 class SignupRequest(BaseModel):
@@ -575,7 +579,11 @@ def health():
 
 
 @app.post("/translate")
-def translate(req: TranslationRequest):
+def translate(req: TranslationRequest, teacher: sqlite3.Row = Depends(require_teacher)):
+    """Runs the NLLB model on a piece of text without saving anything.
+    Used by the upload flow to pre-fill the Bemba review fields before a
+    teacher edits and saves a lesson. Teacher-only now that it's an active
+    part of that flow, not just legacy/unused."""
     if not req.inputs or not req.inputs.strip():
         raise HTTPException(status_code=400, detail="Input text cannot be empty")
     result = run_translation(req.inputs, req.tgt_lang)
@@ -638,11 +646,15 @@ def get_lesson(lesson_id: int, user: sqlite3.Row = Depends(get_current_user)):
 
 @app.post("/api/lessons")
 def create_lesson(req: LessonCreateRequest, teacher: sqlite3.Row = Depends(require_teacher)):
+    """Saves a lesson exactly as submitted - the Bemba fields are expected
+    to already be filled in (via POST /translate, then possibly edited by
+    the teacher), not auto-translated here. This lets a teacher review and
+    correct phrasing before it's saved, rather than saving whatever the
+    model produced sight-unseen."""
     if not req.subject.strip() or not req.topic_en.strip() or not req.content_en.strip():
-        raise HTTPException(status_code=400, detail="All fields are required")
-
-    topic_bem = run_translation(req.topic_en)
-    content_bem = run_translation(req.content_en)
+        raise HTTPException(status_code=400, detail="Subject and English fields are required")
+    if not req.topic_bem.strip() or not req.content_bem.strip():
+        raise HTTPException(status_code=400, detail="Bemba fields are required - translate or fill them in before saving")
 
     created_at = datetime.now(timezone.utc).isoformat()
 
@@ -655,9 +667,9 @@ def create_lesson(req: LessonCreateRequest, teacher: sqlite3.Row = Depends(requi
             (
                 req.subject.strip(),
                 req.topic_en.strip(),
-                topic_bem,
+                req.topic_bem.strip(),
                 req.content_en.strip(),
-                content_bem,
+                req.content_bem.strip(),
                 created_at,
                 teacher["id"],
             ),
@@ -668,9 +680,9 @@ def create_lesson(req: LessonCreateRequest, teacher: sqlite3.Row = Depends(requi
         "id": lesson_id,
         "subject": req.subject.strip(),
         "topic_en": req.topic_en.strip(),
-        "topic_bem": topic_bem,
+        "topic_bem": req.topic_bem.strip(),
         "content_en": req.content_en.strip(),
-        "content_bem": content_bem,
+        "content_bem": req.content_bem.strip(),
     }
 
 

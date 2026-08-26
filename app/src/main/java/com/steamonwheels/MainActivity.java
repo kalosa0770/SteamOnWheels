@@ -1,79 +1,62 @@
 package com.steamonwheels;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
+/**
+ * Pupil home screen: greets them by name and shows the four subject tiles.
+ * Android equivalent of index.html. Pupil-only — teachers are redirected
+ * to TeacherDashboardActivity.
+ */
 public class MainActivity extends AppCompatActivity {
 
-    private boolean isBemba = true;
-
+    private SessionManager sessionManager;
     private TextView tvGreeting;
-    private TextView tvSubjectsTitle;
-    private TextView tvAllLessons;
-    private TextView tvLangEng;
-    private TextView tvLangBem;
-    private View btnLanguageToggle;
-
-    private Button btnMaths, btnLiteracy, btnScience, btnCTS;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        sessionManager = new SessionManager(this);
+        if (!sessionManager.isLoggedIn()) {
+            goTo(LoginActivity.class, true);
+            return;
+        }
+        if (sessionManager.isTeacher()) {
+            goTo(TeacherDashboardActivity.class, true);
+            return;
+        }
+
         tvGreeting = findViewById(R.id.tvGreeting);
-        tvSubjectsTitle = findViewById(R.id.tvSubjectsTitle);
-        tvAllLessons = findViewById(R.id.tvAllLessons);
-        tvLangEng = findViewById(R.id.tvLangEng);
-        tvLangBem = findViewById(R.id.tvLangBem);
-        btnLanguageToggle = findViewById(R.id.btnLanguageToggle);
+        tvGreeting.setText("Welcome back,\n" + sessionManager.getFirstName());
 
-        btnMaths = findViewById(R.id.btnMaths);
-        btnLiteracy = findViewById(R.id.btnLiteracy);
-        btnScience = findViewById(R.id.btnScience);
-        btnCTS = findViewById(R.id.btnCTS);
+        findViewById(R.id.btnSubjectMaths).setOnClickListener(v -> openSubject("Maths"));
+        findViewById(R.id.btnSubjectLiteracy).setOnClickListener(v -> openSubject("Literacy"));
+        findViewById(R.id.btnSubjectScience).setOnClickListener(v -> openSubject("Science"));
+        findViewById(R.id.btnSubjectCts).setOnClickListener(v -> openSubject("CTS"));
 
-        btnLanguageToggle.setOnClickListener(v -> toggleLanguage());
-
-        // Header tap -> Open Upload & Auto-Translate
-        findViewById(R.id.tvAppLogo).setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, UploadLessonActivity.class);
-            startActivity(intent);
-        });
-
-        // Subject Click Handlers
-        btnScience.setOnClickListener(v -> openSubjectLesson("Science"));
-        btnMaths.setOnClickListener(v -> openSubjectLesson("Maths"));
-        btnLiteracy.setOnClickListener(v -> openSubjectLesson("Literacy"));
-        btnCTS.setOnClickListener(v -> openSubjectLesson("CTS"));
+        findViewById(R.id.navHome).setOnClickListener(v -> { /* already here */ });
+        findViewById(R.id.navLessons).setOnClickListener(v -> goTo(AllLessonsActivity.class, false));
+        findViewById(R.id.navProgress).setOnClickListener(v -> goTo(ProgressActivity.class, false));
+        findViewById(R.id.navProfile).setOnClickListener(v -> goTo(ProfileActivity.class, false));
+        NavHelper.highlightTab(this, R.id.navHome);
     }
 
-    private void openSubjectLesson(String subjectName) {
-        Intent intent = new Intent(MainActivity.this, LessonActivity.class);
-        intent.putExtra("SUBJECT_NAME", subjectName);
+    private void openSubject(String subject) {
+        Intent intent = new Intent(this, SubjectLessonsActivity.class);
+        intent.putExtra("SUBJECT_NAME", subject);
         startActivity(intent);
     }
 
-    private void toggleLanguage() {
-        isBemba = !isBemba;
-
-        if (isBemba) {
-            tvGreeting.setText("Mwabweleni,\nba Micheal");
-            tvSubjectsTitle.setText("SUBJECTS");
-            tvAllLessons.setText("Amasambililo yonse  ›");
-            tvLangBem.setTextColor(Color.parseColor("#FF7700"));
-            tvLangEng.setTextColor(Color.parseColor("#64748B"));
-        } else {
-            tvGreeting.setText("Welcome,\nMicheal");
-            tvSubjectsTitle.setText("SUBJECTS");
-            tvAllLessons.setText("All lessons  ›");
-            tvLangEng.setTextColor(Color.parseColor("#FF7700"));
-            tvLangBem.setTextColor(Color.parseColor("#64748B"));
+    private void goTo(Class<?> destination, boolean clearStack) {
+        Intent intent = new Intent(this, destination);
+        if (clearStack) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         }
+        startActivity(intent);
+        if (clearStack) finish();
     }
 }

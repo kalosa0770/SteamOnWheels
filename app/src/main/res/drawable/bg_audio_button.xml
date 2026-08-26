@@ -1,5 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/brand_dark_blue" />
-    <corners android:radius="24dp" />
-</shape>
+<!-- Navy pill for btnListenAudio on the lesson screen. Same base color as
+     bg_button_nav, but the pressed state flashes the brand orange instead
+     of a darker navy — a small distinct touch for the one "play" action
+     in the app, rather than being visually identical to every other
+     navy button. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#E56A00" />
+            <corners android:radius="999dp" />
+        </shape>
+    </item>
+
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#073540" />
+            <corners android:radius="999dp" />
+        </shape>
+    </item>
+
+</selector>

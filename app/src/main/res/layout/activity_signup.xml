@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create your account"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/navy"
+            android:layout_marginTop="24dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pupils can view and listen to lessons. Teachers can upload lesson content for the class."
+            android:textSize="13sp"
+            android:textColor="@color/text_muted"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="I am a…"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@color/navy"
+            android:layout_marginTop="20dp" />
+
+        <RadioGroup
+            android:id="@+id/rgRole"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="6dp">
+
+            <RadioButton
+                android:id="@+id/rbPupil"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pupil"
+                android:checked="true" />
+
+            <RadioButton
+                android:id="@+id/rbTeacher"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Teacher"
+                android:layout_marginStart="24dp" />
+        </RadioGroup>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Full name"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@color/navy"
+            android:layout_marginTop="20dp" />
+
+        <EditText
+            android:id="@+id/etName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:background="@color/white"
+            android:padding="14dp"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Email"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@color/navy"
+            android:layout_marginTop="16dp" />
+
+        <EditText
+            android:id="@+id/etEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textEmailAddress"
+            android:background="@color/white"
+            android:padding="14dp"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Password"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@color/navy"
+            android:layout_marginTop="16dp" />
+
+        <EditText
+            android:id="@+id/etPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword"
+            android:hint="At least 6 characters"
+            android:background="@color/white"
+            android:padding="14dp"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Confirm password"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@color/navy"
+            android:layout_marginTop="16dp" />
+
+        <EditText
+            android:id="@+id/etConfirmPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword"
+            android:background="@color/white"
+            android:padding="14dp"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/btnSignup"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@drawable/bg_button_orange"
+            android:gravity="center"
+            android:text="Create account"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:layout_marginTop="24dp"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <TextView
+            android:id="@+id/tvError"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/error"
+            android:textSize="13sp"
+            android:layout_marginTop="12dp"
+            android:visibility="gone" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Already have an account?"
+            android:textColor="@color/text_muted"
+            android:textSize="13sp"
+            android:layout_marginTop="24dp" />
+
+        <TextView
+            android:id="@+id/tvGoToLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Log in"
+            android:textColor="@color/orange_dark"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp"
+            android:clickable="true"
+            android:focusable="true" />
+
+    </LinearLayout>
+</ScrollView>

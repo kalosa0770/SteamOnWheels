@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="64dp"
+    android:orientation="horizontal"
+    android:background="@drawable/bg_bottom_nav"
+    android:gravity="center_vertical">
+
+    <!-- Text colors here are just the initial/fallback state before
+         NavHelper.highlightTab() runs in each Activity's onCreate — it
+         sets the same @color/white / @color/nav_inactive values at
+         runtime based on which screen is active. -->
+
+    <TextView
+        android:id="@+id/navHome"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="Home"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:clickable="true"
+        android:focusable="true" />
+
+    <TextView
+        android:id="@+id/navLessons"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="Lessons"
+        android:textColor="@color/nav_inactive"
+        android:textSize="12sp"
+        android:clickable="true"
+        android:focusable="true" />
+
+    <TextView
+        android:id="@+id/navProgress"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="Progress"
+        android:textColor="@color/nav_inactive"
+        android:textSize="12sp"
+        android:clickable="true"
+        android:focusable="true" />
+
+    <TextView
+        android:id="@+id/navProfile"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="Profile"
+        android:textColor="@color/nav_inactive"
+        android:textSize="12sp"
+        android:clickable="true"
+        android:focusable="true" />
+
+</LinearLayout>

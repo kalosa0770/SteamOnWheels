@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Orange pill — for solid orange CTAs (Log in, Create account, Save
+     name, Auto-translate & save) and the active ENG/BEM toggle segment.
+     None of the other 6 drawables modeled a pill-shaped orange button, so
+     this fills that gap alongside them rather than leaving CTAs as flat
+     square-cornered rectangles. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/orange_dark" />
+            <corners android:radius="999dp" />
+        </shape>
+    </item>
+
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/orange" />
+            <corners android:radius="999dp" />
+        </shape>
+    </item>
+
+</selector>
