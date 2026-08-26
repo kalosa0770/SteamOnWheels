@@ -26,18 +26,21 @@ torch.set_num_threads(2)
 
 app = FastAPI(title="Steam on Wheels Bemba Translation API")
 
-# Using the "lite" distilled 600M checkpoint rather than the full 1.3B.
-# Upgraded back from the 600M "lite" model to nllb-200-distilled-1.3B.
-# In practice, teachers found 600M's Bemba output clunky/unnatural even
-# with the decoding fixes (beam search, no_repeat_ngram_size, sentence
-# splitting) - those fixes solve repetition/truncation bugs, but they
-# don't add vocabulary or grammatical nuance a smaller model doesn't have.
-# Bemba is a low-resource pair for NLLB, and low-resource pairs benefit
-# disproportionately from model size. This is a real RAM/latency cost
-# (roughly double 600M) - the teacher-editable Bemba review step (see
-# POST /api/lessons below) is the other half of addressing quality: even
-# a better model won't be perfect for Bemba, so teachers can hand-correct
-# phrasing per-lesson regardless of what the model produces.
+# nllb-200-3.3B (~10-13GB) was tried but reverted - Railway's Hobby plan
+# hard-caps each replica at 8GB RAM (confirmed in the actual Settings page,
+# not just the plan's marketing copy), so 3.3B genuinely cannot run here
+# without OOM-crashing the whole app, not just failing a translation.
+# nllb-200-distilled-1.3B is the largest checkpoint that fits comfortably
+# within 8GB alongside the TTS models and everything else in this process.
+# If you upgrade past Hobby (Railway's "Upgrade for higher limits" on that
+# same Settings > Resources page) for more RAM headroom, 3.3B becomes a
+# real option again - it's a one-line change back. Bemba is a low-resource
+# pair for NLLB, and low-resource pairs benefit disproportionately from
+# model size, so that upgrade path is genuinely worth it if you want to
+# push quality further later. The teacher-editable Bemba review step (see
+# POST /api/lessons below) still matters regardless of model size - even
+# this model won't be perfect for Bemba, so teachers can hand-correct
+# phrasing per-lesson on top of whatever it produces.
 MODEL_ID = "facebook/nllb-200-distilled-1.3B"
 SRC_LANG = "eng_Latn"
 TGT_LANG = "bem_Latn"
